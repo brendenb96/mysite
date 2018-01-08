@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Miners - Add Miner</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="static/webapp/favicon.png"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js"></script>
+  <style>
+  /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 550px}
+    
+    /* Set gray background color and 100% height */
+    .sidenav {
+      background-color: #f1f1f1;
+      height: 100%;
+    }
+        
+    /* On small screens, set height to 'auto' for the grid */
+    @media screen and (max-width: 767px) {
+      .row.content {height: auto;} 
+    }
+    .back {
+      background-image: url('/static/webapp/background.jpg');
+      height: 100%;
+    }
+
+  </style>
+      
+      <div class="container-fluid">
+        <div class="row content">
+          <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
+            <img src="/static/webapp/logo.svg" width="100%">
+            <p style="text-align:center;font-family: Ubuntu; ">Welcome {{user}}</p>
+            <ul class="nav nav-pills nav-stacked">
+              <li><a href="/">STATUS</a></li>
+              <li class="active"><a href="/minerform">ADD MINER</a></li>
+              <li><a href="/force_refresh">FORCE REFRESH</a></li>
+              <li><a href="/copyright">MISC</a></li>
+              <li><a href="/logout/">LOGOUT</a></li>
+            </ul><br>
+          </div>
+          <br>
+</head>
+<body>
+        {% if invalid %}
+        <script>
+            $.notify("Please fill in form correctly!", "error");
+        </script>
+        {% endif %}
+          <div class="col-sm-10">
+                <form method="post" class="well">{% csrf_token %}
+                            {% for field in form %}
+                                    <div class="form-group">
+                                        <label class="control-label" style="font-family:Ubuntu">{{ field.label|upper }}</label> 
+                                        <div class="controls">{{ field }}
+                                    </div>
+                                    </div>
+                            {% endfor %}
+                        <br>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" ><a href="post"></a>Submit</button>
+                        </div>
+                    </form>
+
+          </div>
+
+</body>
+</html>

@@ -1,0 +1,11 @@
+
+ # 2018.01.07: Written by Brenden Bickner
+ #
+ # Updates database of miners every 5 minutes
+ #
+
+SHELL=/bin/bash
+MAILTO=""
+
+#runs the race_error_catch program every 5 minutes
+*/5 * * * * root nice -n 19 /usr/local/imager/update_miners.py
