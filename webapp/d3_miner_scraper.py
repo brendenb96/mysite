@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import pprint
 import sqlite3
@@ -9,8 +10,8 @@ import requests
 from requests.auth import HTTPDigestAuth
 import subprocess
 
-db_name = '/home/brenden/Programs/django_database/db.sqlite3'
-#db_name = '/var/www/mysite/db.sqlite3'
+#db_name = '/home/brenden/Programs/django_database/db.sqlite3'
+db_name = '/var/www/mysite/db.sqlite3'
 
 def update_db():
 
@@ -113,10 +114,16 @@ def update_db():
 
             if pool_one.rstrip() == '':
                 pool_one = 'NONE'
+                pool_one_worker = 'NONE'
+                pool_one_password = 'NONE'
             if pool_two.rstrip() == '':
                 pool_two = 'NONE'
+                pool_two_worker = 'NONE'
+                pool_two_password = 'NONE'
             if pool_three.rstrip() == '':
                 pool_three = 'NONE'
+                pool_three_worker = 'NONE'
+                pool_three_password = 'NONE'
 
         print ip
         print pool_one
@@ -509,17 +516,21 @@ def set_miner_conf(ip, username, password, pool_number, pool_arg, pool_user, poo
     out_file = '/tmp/temp_cgminer_good.conf'
 
         # sshpass -p "admin" scp root@172.16.1.76:/config/cgminer.conf testing2
-
-    get_remote_string = 'sshpass -p "%s" scp %s@%s:/config/cgminer.conf %s'%(password, username, ip, in_file)
-    put_remote_string = 'sshpass -p "%s" scp %s %s@%s:/config/cgminer.conf'%(password, out_file, username, ip)
-    run_remote_string = "sshpass -p '%s' ssh %s@%s 'etc/init.d/cgminer.sh restart'"%(password, username, ip)
+    
+    #get_remote_string = 'sshpass -p "%s" rsync -avz root@%s:/config/cgminer.conf %s'%(password, ip, in_file)
+    get_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no %s@%s:/config/cgminer.conf %s'%(password, username, ip, in_file)
+    put_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no %s %s@%s:/config/cgminer.conf'%(password, out_file, username, ip)
+    run_remote_string = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no %s@%s '/etc/init.d/cgminer.sh restart'"%(password, username, ip)
+    perm_string = "chmod 7777 /tmp/temp_cgminer.conf"
 
     print get_remote_string
     print put_remote_string
     print run_remote_string
 
-    communicate(get_remote_string)
-
+    resp = communicate(get_remote_string)
+    print resp
+    #communicate(perm_string)
+    
     json_data=open(in_file).read()
     miner_config_content = json.loads(json_data)
 
@@ -542,6 +553,8 @@ def set_miner_conf(ip, username, password, pool_number, pool_arg, pool_user, poo
         json.dump(miner_config_content, outfile)
 
     communicate(put_remote_string)
-    communicate(run_remote_string)
+    resp = communicate(run_remote_string)
+    print "****************"
+    print resp
 
     return 0

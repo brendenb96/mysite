@@ -208,7 +208,7 @@
 
       <div id="d3_miners">
       {% for miner in object_list %}
-      {% if miner.type == 'antd3' %}
+      {% if 'D3' in miner.type|upper %}
       <div class="row">
             
             <div class="container-fluid miner_cont" id=miner{{miner.id}}>
@@ -264,7 +264,7 @@
                             {% endif %}
                             </tr>
                             <tr style="background-color: #E9E9E9">              
-                <td><div class="result_box_0 classify-bad">NO CHIPS</div></td>
+				    <td><div class="result_box_0 classify-text" title="Miner Type">{{ miner.type }}</div></td>
                 <td><div class="result_box_0 classify-good">ALL CHIPS</div> </td>
                 <td><div class="result_box_0 classify-text" title="IP Address">{{miner.ip}}</div> </td>
                             </tr>
@@ -355,7 +355,7 @@
 
       <div id="l3_miners">
           {% for miner in object_list %}
-          {% if miner.type == 'antl3' %}
+          {% if 'L3' in miner.type|upper %}
           <div class="row">
                 
                 <div class="container-fluid miner_cont" id=miner{{miner.id}}>
@@ -411,7 +411,7 @@
                                 {% endif %}
                                 </tr>
                                 <tr style="background-color: #E9E9E9">              
-                    <td><div class="result_box_0 classify-bad">NO CHIPS</div></td>
+					<td><div class="result_box_0 classify-bad" title="Miner Type">{{miner.type}}</div></td>
                     <td><div class="result_box_0 classify-good">ALL CHIPS</div> </td>
                     <td><div class="result_box_0 classify-text" title="IP Address">{{miner.ip}}</div> </td>
                                 </tr>

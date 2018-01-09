@@ -14,7 +14,8 @@ import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.11/howto/deployment/checklist/
@@ -25,7 +26,7 @@ SECRET_KEY = 'w*4zy14hwql-iny2f*g%ie67_95^)q874xn_^kh(@wom%-ip24'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [u'24.66.124.142',u'192.168.0.19',u'localhost']
+ALLOWED_HOSTS = [u'24.66.124.142',u'192.168.0.37',u'localhost']
 
 
 # Application definition
@@ -77,7 +78,7 @@ WSGI_APPLICATION = 'mysite.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('/home/brenden/Programs/django_database', 'db.sqlite3'),
+        'NAME': os.path.join('/var/www/mysite', 'db.sqlite3'),
     }
 }
 
@@ -120,3 +121,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+            os.path.join('/var/www/mysite/webapp', 'static'),
+            )
+
