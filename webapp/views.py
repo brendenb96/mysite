@@ -38,6 +38,82 @@ def thanks(request):
 
 
 @login_required(login_url='/login/')
+def overview(request):
+	global HASH_BENCHMARK
+	global deleted
+	global added
+	global pool_change
+	global force_ref
+
+	template_dict = {}
+	query_list = Miner.objects.all()
+	print query_list
+	sum = 0.0
+	counter = 0.0
+	average_hash = 0.0
+	high_hash = 0.0
+	low_hash = 10000000000000000000.0
+	has_miners = False
+	for miner in query_list:
+		has_miners = True
+		if miner.hash_rate > high_hash:
+			high_hash = miner.hash_rate
+		if miner.hash_rate < low_hash:
+			low_hash = miner.hash_rate
+
+		sum = sum + miner.hash_rate
+		counter = counter + 1.0
+	if counter != 0.0:
+		average_hash = str(sum/counter)
+
+	if low_hash == 10000000000000000000.0:
+		low_hash = 0.0
+
+
+	template_dict['eff'] = "{0:.2f}".format((float(average_hash)/HASH_BENCHMARK)*100)
+	template_dict['object_list'] = query_list
+	template_dict['avg_hash'] = average_hash
+	template_dict['min_hash'] = low_hash
+	template_dict['max_hash'] = high_hash
+	template_dict['miners'] = query_list
+	template_dict['user'] = request.user.get_short_name()
+	template_dict['has_miners'] = has_miners
+	template_dict['refresh_redirect'] = '/overview'
+
+	efficiency = (float(average_hash)/HASH_BENCHMARK)*100
+
+	if efficiency < 70.0:
+		template_dict['slow_hash'] = True
+	else:
+		template_dict['slow_hash'] = False
+
+	if deleted:
+		template_dict['deleted'] = True
+		deleted = False
+	else:
+	 	template_dict['deleted'] = False
+
+	if added:
+		template_dict['added'] = True
+		added = False
+	else:
+	 	template_dict['added'] = False
+
+	if pool_change:
+		template_dict['pool_change'] = True
+		pool_change = False
+	else:
+	 	template_dict['pool_change'] = False
+
+	if force_ref:
+		template_dict['force_ref'] = True
+		force_ref = False
+	else:
+	 	template_dict['force_ref'] = False
+
+	return render(request,'webapp/template.html',template_dict)
+
+@login_required(login_url='/login/')
 def index(request):
 	global HASH_BENCHMARK
 	global deleted
@@ -78,6 +154,7 @@ def index(request):
 	template_dict['miners'] = query_list
 	template_dict['user'] = request.user.get_short_name()
 	template_dict['has_miners'] = has_miners
+	template_dict['refresh_redirect'] = '/'
 
 	efficiency = (float(average_hash)/HASH_BENCHMARK)*100
 
@@ -110,7 +187,7 @@ def index(request):
 	else:
 	 	template_dict['force_ref'] = False
 
-	return render(request,'webapp/template.html',template_dict)
+	return render(request,'webapp/overview.html',template_dict)
 
 @login_required(login_url='/login/')
 def addminer(request):

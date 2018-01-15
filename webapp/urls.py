@@ -8,6 +8,7 @@ urlpatterns = [
 	url(r'^logout/$', auth_views.logout, name='logout'),
 	url(r'^$',views.index,name='index'),
 	#url(r'^(?P<elements>\w+?)/$',views.index,name='index'),
+	url(r'^overview/$',views.overview,name='overview'),
 	url(r'^minerform/$',views.minerform,name='mineform'),
 	url(r'^copyright/$',views.copyright,name='copyright'),
 	url(r'^force_refresh/$',views.force_refresh,name='force_refresh'),

@@ -42,6 +42,8 @@ class Miner(models.Model):
     bitmain_vil = models.CharField(max_length=10, default='true')
     bitmain_freq = models.CharField(max_length=10, default='0')
 
+    has_error = models.BooleanField(default=True)
+
     def __unicode__(self):
         return self.name
 

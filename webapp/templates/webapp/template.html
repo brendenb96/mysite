@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   {% load static %}
-  <title>Miners - Status</title>
+  <title>Miners - Overview</title>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="shortcut icon" type="image/png" href="/static/webapp/favicon.png"/>
@@ -11,10 +11,45 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script src="https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
   <style>
     /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
     .row.content {height: 550px}
+
+    .glyphicon {
+      margin-right: 10px;
+    }
     
+    #divLoading
+    {
+    display : none;
+    }
+    #divLoading.show
+    {
+    display : block;
+    position : fixed;
+    z-index: 100;
+    background-image : url('/static/webapp/load_ball.gif');
+    background-repeat : no-repeat;
+    background-position : center;
+    left : 0;
+    bottom : 0;
+    right : 0;
+    top : 0;
+    }
+    #loadinggif.show
+    {
+    left : 50%;
+    top : 50%;
+    position : absolute;
+    z-index : 101;
+    width : 32px;
+    height : 32px;
+    margin-left : -16px;
+    margin-top : -16px;
+    }
+
     /* Set gray background color and 100% height */
     .sidenav {
       background-color: #f1f1f1;
@@ -80,25 +115,34 @@
 	color: black;
 }   
     .classify-bad {
-	background-color: red;
+	background-color: #AA1F1F;
 	color: white;
 }
     .classify-text {
 	background-color: #4c6059;
 	color: white;
 } 
+
   </style>
       <div class="container-fluid">
         <div class="row content">
           <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
-            <img src="static/webapp/logo.svg" width="100%">
+            <br>
+            <img src="/static/webapp/logo.png" width="100%">
             <p style="text-align:center;font-family: Ubuntu; ">Welcome {{user}}</p>
             <ul class="nav nav-pills nav-stacked">
-              <li class="active"><a href="/">STATUS</a></li>
-              <li><a href="/minerform">ADD MINER</a></li>
-              <li><a href="/force_refresh">FORCE REFRESH</a></li>
-              <li><a href="/copyright">MISC</a></li>
-              <li><a href="/logout/?next=/thanks">LOGOUT</a></li>
+              <li><a href="/"> 
+                <span class="glyphicon glyphicon-home"></span> STATUS</a></li>
+              <li class="active "><a href="/overview">
+                <span class="glyphicon glyphicon-tasks"></span>  OVERVIEW</a></li>
+              <li><a href="/minerform">
+                <span class="glyphicon glyphicon-plus"></span> ADD MINER</a></li>
+              <li><a id="force" href="/force_refresh">
+                <span class="glyphicon glyphicon-refresh"></span> FORCE REFRESH</a></li>
+              <li><a href="/copyright">
+                <span class="glyphicon glyphicon-book"></span> MISC</a></li>
+              <li><a href="/logout/?next=/thanks">
+                <span class="glyphicon glyphicon-log-out"></span> LOGOUT</a></li>
             </ul><br>
           </div>
           <br>
@@ -180,7 +224,7 @@
           </div>
         </div>
       </div>
-    
+    <div id="divLoading"></div>
       <!-- Which Miners to Display -->
     {% if has_miners %}
     <div>
@@ -233,7 +277,7 @@
                             <td><div class="result_box_0 classify-good" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                             {% elif miner.chain_1_temp >= 70 and miner.chain_1_temp < 80 %}
                             <td><div class="result_box_0 classify-warn" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
-                            {% elif miner.chain_1_temp >= 80 %}
+                            {% elif miner.chain_1_xtemp >= 80 %}
                             <td><div class="result_box_0 classify-bad" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                             {% else %}
                             <td><div class="result_box_0 classify-text" title="Chip 2">{{miner.chain_1_temp}}°C</div></td>
@@ -282,7 +326,7 @@
               </div>
               <div class="col-sm-4"style="background-color: #E9E9E9">
                   <p style="text-align:left;font-weight:bold">ASIC Status:</p>
-                  {% if 'x' in miner.asic1 %}
+                  {% if 'x' in miner.asic1  or 'Couldn' in miner.asic1 %}
                   <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 1">
                     {{miner.asic1}}
                   </div>
@@ -291,7 +335,7 @@
                     {{miner.asic1}}
                   </div>
                   {% endif %}
-                  {% if 'x' in miner.asic2 %}
+                  {% if 'x' in miner.asic2  or 'Couldn' in miner.asic2 %}
                   <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 2">
                     {{miner.asic2}}
                   </div>
@@ -300,7 +344,7 @@
                     {{miner.asic2}}
                   </div>
                   {% endif %}
-                  {% if 'x' in miner.asic3 %}
+                  {% if 'x' in miner.asic3  or 'Couldn' in miner.asic3 %}
                   <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 3">
                     {{miner.asic3}}
                   </div>
@@ -511,6 +555,26 @@
 </body>
 
 <script>
+
+  $('#force').click(function(e) {
+  e.preventDefault(); // Prevent the href from redirecting directly
+  var linkURL = $(this).attr("href");
+  warnBeforeRedirect(linkURL);
+  });
+  
+   function warnBeforeRedirect(linkURL) {
+      swal({
+        title: "Are you sure?", 
+        text: "Forcing a refresh could take up to 5 seconds per miner. Miners are automatically refreshed every 5 minutes.", 
+        type: "warning",
+        showCancelButton: true
+      }, function() {
+        // Redirect the user
+        $("div#divLoading").addClass('show');    
+        window.location.href = linkURL;
+        
+      });
+    }
 
     function refresh_miners(activities){
       if( $('#show_miners').val() == 'all'){

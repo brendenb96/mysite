@@ -10,8 +10,13 @@ import requests
 from requests.auth import HTTPDigestAuth
 import subprocess
 
-#db_name = '/home/brenden/Programs/django_database/db.sqlite3'
-db_name = '/var/www/mysite/db.sqlite3'
+DB_NAME = '/home/brenden/Programs/django_database/db.sqlite3'
+#DB_NAME = '/var/www/mysite/db.sqlite3'
+
+TEMP_HI = 75
+TEMP_LO = 30
+HASH_LO = 15000
+
 
 def update_db():
 
@@ -21,20 +26,25 @@ def update_db():
     # scrape miner
     # update db with new info
 
-    global db_name
+    global DB_NAME
+    global TEMP_HI
+    global TEMP_LO
+    global HASH_LO
 
-    conn = sqlite3.connect(db_name)
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     all_ips = cursor.execute("SELECT ip FROM webapp_miner").fetchall()
     all_passwords = cursor.execute("SELECT password FROM webapp_miner").fetchall()
     all_sshpasswords = cursor.execute("SELECT sshpassword FROM webapp_miner").fetchall()
     all_users = cursor.execute("SELECT username FROM webapp_miner").fetchall()
+    all_types = cursor.execute("SELECT type FROM webapp_miner").fetchall()
     cursor.execute("DELETE FROM webapp_miner")
 
     counter = 0
     for machine in all_ips:
         ip_dest = machine[0].encode("utf-8")
+        type = all_types[counter][0].encode("utf-8")
         username = all_users[counter][0].encode("utf-8")
         password = all_passwords[counter][0].encode("utf-8")
         ssh_password = all_sshpasswords[counter][0].encode("utf-8")
@@ -51,13 +61,13 @@ def update_db():
 
         try:
             session = requests.Session()
-            miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password))
+            miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password), timeout=5)
             miner_status_content = miner_status_page.json()
 
-            miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password))
+            miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password), timeout=5)
             miner_system_content = miner_system_page.json()
 
-            miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password))
+            miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password), timeout=5)
             miner_config_content = miner_config_page.json()
         except Exception as err:
             error_webpage = True
@@ -68,7 +78,6 @@ def update_db():
             pool_two = "Couldn't Update"
             pool_three = "Couldn't Update"
             hash_rate = "0.00"
-            type = "Couldn't Update"
             name = "ERROR: Couldn't Update Miner"
             uptime = "XX:XX"
             chain1_temp = "0"
@@ -81,9 +90,14 @@ def update_db():
             pool_two_worker = "Couldn't Update"
             pool_three_worker = "Couldn't Update"
 
-            pool_one_password = miner_config_content['pools'][0]['pass']
-            pool_two_password = miner_config_content['pools'][1]['pass']
-            pool_three_password = miner_config_content['pools'][2]['pass']
+            pool_one_password = "Couldn't Update"
+            pool_two_password = "Couldn't Update"
+            pool_three_password = "Couldn't Update"
+
+            bitmain_freq = "True"
+            bitmain_vil = "0"
+
+            has_error = True
 
         else:
             ip = ip_dest
@@ -91,7 +105,6 @@ def update_db():
             pool_two = miner_config_content['pools'][1]['url']
             pool_three = miner_config_content['pools'][2]['url']
             hash_rate = miner_status_content['summary']['ghsav']
-            type = miner_system_content['minertype']
             name = miner_system_content['hostname']
             uptime = miner_system_content['uptime']
             chain1_temp = miner_status_content['devs'][0]['freq'].split(',')[9].split('=')[1]
@@ -110,7 +123,9 @@ def update_db():
             pool_three_password = miner_config_content['pools'][2]['pass']
 
             bitmain_vil = miner_config_content['bitmain-use-vil']
-            bitmain_freq = miner_config_content['bitmain-freq'] 
+            bitmain_freq = miner_config_content['bitmain-freq']
+
+            has_error = False 
 
             if pool_one.rstrip() == '':
                 pool_one = 'NONE'
@@ -124,6 +139,18 @@ def update_db():
                 pool_three = 'NONE'
                 pool_three_worker = 'NONE'
                 pool_three_password = 'NONE'
+
+            if chain1_temp > TEMP_HI or chain1_temp < TEMP_LO:
+                has_error = True
+
+            if chain2_temp > TEMP_HI or chain2_temp < TEMP_LO:
+                has_error = True
+
+            if chain3_temp > TEMP_HI or chain3_temp < TEMP_LO:
+                has_error = True
+
+            if float(hash_rate) < HASH_LO:
+                has_error = True
 
         print ip
         print pool_one
@@ -147,11 +174,11 @@ def update_db():
         while(insert_pass and insert_tries <= 30):
             try:
                 insert_tries = insert_tries + 1
-                cursor.execute("INSERT INTO webapp_miner VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", 
+                cursor.execute("INSERT INTO webapp_miner VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", 
                     [insert_tries,name,ip,pool_one,pool_two,pool_three,float(hash_rate),type,password,username,
                     int(chain1_temp),int(chain2_temp),int(chain3_temp),uptime,asic1,asic2,asic3,
                     pool_one_password,pool_one_worker,pool_three_password,pool_three_worker,pool_two_password,
-                    pool_two_worker,bitmain_freq,bitmain_vil,ssh_password])
+                    pool_two_worker,bitmain_freq,bitmain_vil,ssh_password,has_error])
                 insert_pass = False
             except Exception as e:
                 error_msg = e
@@ -177,9 +204,12 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
     # scrape miner
     # update db with new info
 
-    global db_name
+    global DB_NAME
+    global TEMP_HI
+    global TEMP_LO
+    global HASH_LO
 
-    conn = sqlite3.connect(db_name)
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     error_webpage = False
@@ -195,13 +225,13 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
 
     try:
         session = requests.Session()
-        miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password))
+        miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password),timeout=5)
         miner_status_content = miner_status_page.json()
 
-        miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password))
+        miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password), timeout=5)
         miner_system_content = miner_system_page.json()
 
-        miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password))
+        miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password), timeout=5)
         miner_config_content = miner_config_page.json()
     except Exception as err:
         error_webpage = True
@@ -232,6 +262,8 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
         pool_one_password = 'none'
         pool_two_password =  'none'
         pool_three_password = 'none'
+
+        has_error = True
 
     else:
         ip = ip_dest
@@ -267,7 +299,9 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
             asic3 = "No Pool"
 
         bitmain_vil = miner_config_content['bitmain-use-vil']
-        bitmain_freq = miner_config_content['bitmain-freq'] 
+        bitmain_freq = miner_config_content['bitmain-freq']
+
+        has_error = False 
 
         if pool_one.rstrip() == '':
             pool_one = 'NONE'
@@ -299,11 +333,11 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
     while(insert_pass and insert_tries <= 30):
         try:
             insert_tries = insert_tries + 1
-            cursor.execute("INSERT INTO webapp_miner VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", 
+            cursor.execute("INSERT INTO webapp_miner VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", 
             [insert_tries,name,ip,pool_one,pool_two,pool_three,float(hash_rate),type,password,username,
             int(chain1_temp),int(chain2_temp),int(chain3_temp),uptime,asic1,asic2,asic3,
             pool_one_password,pool_one_worker,pool_three_password,pool_three_worker,pool_two_password,
-            pool_two_worker,bitmain_freq,bitmain_vil,sshpassword])
+            pool_two_worker,bitmain_freq,bitmain_vil,sshpassword,has_error])
             insert_pass = False
         except Exception as e:
             error_msg = e
@@ -331,9 +365,12 @@ def update_one_entry(ip_dest, username, password, type_miner):
     # scrape miner
     # update db with new info
 
-    global db_name
+    global DB_NAME
+    global TEMP_HI
+    global TEMP_LO
+    global HASH_LO
 
-    conn = sqlite3.connect(db_name)
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
 
     error_webpage = False
@@ -385,6 +422,8 @@ def update_one_entry(ip_dest, username, password, type_miner):
         pool_two_password =  'none'
         pool_three_password = 'none'
 
+        has_error = True
+
     else:
         ip = ip_dest
         pool_one = miner_config_content['pools'][0]['url']
@@ -419,7 +458,9 @@ def update_one_entry(ip_dest, username, password, type_miner):
             asic3 = "No Pool"
 
         bitmain_vil = miner_config_content['bitmain-use-vil']
-        bitmain_freq = miner_config_content['bitmain-freq'] 
+        bitmain_freq = miner_config_content['bitmain-freq']
+
+        has_error = False 
 
         if pool_one.rstrip() == '':
             pool_one = 'NONE'
@@ -471,8 +512,8 @@ def delete_db(database):
     # scrape miner
     # update db with new info
 
-    global db_name
-    conn = sqlite3.connect(db_name)
+    global DB_NAME
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM webapp_miner")
     conn.commit()
@@ -486,8 +527,8 @@ def delete_one_db(id):
     # scrape miner
     # update db with new info
 
-    global db_name
-    conn = sqlite3.connect(db_name)
+    global DB_NAME
+    conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     cursor.execute("DELETE FROM webapp_miner where id=?",[id])
     conn.commit()
