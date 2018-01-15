@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 
 import os
 
-DIR = '/home/brenden/Programs/django_database'
-#DIR = '/var/www/mysite
+#DIR = '/home/brenden/Programs/django_database'
+DIR = '/var/www/mysite'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -125,6 +125,6 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
-            os.path.join('/home/brenden/Programs/mysite/webapp', 'static'),
+            os.path.join('/var/www/mysite/webapp', 'static'),
             )
 
