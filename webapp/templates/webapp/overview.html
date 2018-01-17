@@ -14,11 +14,33 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
   <style>
+  
+    .table-dark{
+    	background-color:#393939;
+    	color:white;
+    	
+    	
+    }
+    .pool_dark{
+       background-color:#a3a3a3;
+       color: black;
+       border-color:#393939;
+       font-weight:normal;
+       overflow:scroll;
+    }
+    .asic{
+    
+    }
+    .panel-dark{
+    background-color:#232323;
+    color:white;
+    font-weight:bold;
+    }
     /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
     .row.content {height: 550px}
 
     .dark {
-      background-image: url('/static/webapp/dark.jpeg');
+      background-image: url('/static/webapp/dark.jpg');
     }
     .darkside {
       background-color: #131313;
@@ -90,43 +112,70 @@
 	float: 0;
 	margin: 3px;
 	margin-right: 1px;
-	padding: 3px;
-	width: 105px;
-	height: 30px;
+	padding: 8px;
+	width: 100%;
+	height: 40px;
 	border-radius: 4px;
 	text-align: center;
   vertical-align: middle;
 	font-family: "Raleway", "Lato", Helvetica, Arial, sans-serif;
 	font-size: 14px;
 }
-    .result_box_2 {
-	float: 0;
-	margin: 3px;
-	margin-right: 1px;
-	padding: 3px;
-	width: 100px;
-	height: 25px;
-	border-radius: 4px;
-	text-align: center;
-	font-family: "Raleway", "Lato", Helvetica, Arial, sans-serif;
-	font-size: 14px;
+    .result_box_1 {
+      float: 0;
+      margin: 3px;
+      margin-right: 1px;
+      padding: 8px;
+      width: 135px;
+      height: 40px;
+      border-radius: 4px;
+      text-align: center;
+      vertical-align: middle;
+      font-family: "Raleway", "Lato", Helvetica, Arial, sans-serif;
+      font-size: 14px;
 }
     .classify-good {
-	background-color: #00A700;
+	background-color: #007a00;
+	border-color:#007a00;
 	color: white;
+	font-weight:normal;
 }
     .classify-warn {
-	background-color: #E9D718;
+	background-color: #fff4a8;
+	border-color:#fff4a8;
 	color: black;
+	font-weight:normal;
 }   
     .classify-bad {
-	background-color:#AA1F1F;
+	background-color:#841a1a;
+	border-color:#841a1a;
 	color: white;
+	font-weight:normal;
 }
     .classify-text {
-	background-color: #4c6059;
+	background-color: #647a72;
+	border-color:#647a72;
 	color: white;
+	font-weight:normal;
+  
 } 
+.classify-title {
+	color: white;
+}
+.center {
+  position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-50%);
+}
+.panel-heading{
+	font-weight:bold;
+	font-size:1.2em;
+}
+.btn-or{
+	background-color: #ff5a09;
+	color:white;
+}
   </style>
       <div class="container-fluid">
           <div class="row content">
@@ -145,8 +194,6 @@
                   <span class="glyphicon glyphicon-refresh"></span> FORCE REFRESH</a></li>
                 <li><a href="/copyright">
                   <span class="glyphicon glyphicon-book"></span> MISC</a></li>
-                <li><a id='darkmode'>
-                    <span class="glyphicon glyphicon-book"></span> Dark Mode</a></li>
                 <li><a href="/logout/?next=/thanks">
                   <span class="glyphicon glyphicon-log-out"></span> LOGOUT</a></li>
               </ul><br>
@@ -158,153 +205,200 @@
                       <div class="modal-dialog-lg">
                   
                       <!-- Modal content-->
-                      <div class="modal-content">
-                          <div class="modal-header">
+                      <div class="modal-content" style="background-color:#232323">
+                          <div class="modal-header" style="background-color:#393939;font-weight:bold;border-color:black;">
                           <button type="button" class="close" data-dismiss="modal">&times;</button>
-                          <h4 class="modal-title">Miner - {{miner.name}}</h4>
+                          <h3 class="modal-title" style="color:#ff5a09;">Miner - {{miner.name}}</h4>
                           </div>
-                          <div class="modal-body">
+                          <div class="modal-body dark" style="border-color:black;">
                                 <div class="row">
                                         
                                         <div id=miner{{miner.id}}>
-                                            {% if 'ERROR' in miner.name %}
-                                            <div class="well miner_title_cont" style="background-color:#AA1F1F;">
-                                                <p class="miner_title">Miner - {{miner.name}}</p>
-                                            </div>
-                                            {% else %}
-                                            <div class="well miner_title_cont">
-                                                <p class="miner_title">Miner - {{miner.name}}</p>
-                                            </div>
-                                            {% endif %}
+                                            
                                               <div class="col-sm-4">
-                                              <table class="table-condensed table-striped" style="margin-left: 50px;">
+                                               <div class="panel panel-dark row" style="margin-left: 20px;margin-right: 20px;">
+                                               <div class="panel-heading">General Status</div>
+                                          		<div id="statswrap" class="panel-body table-dark table-responsive">
+                                              <table class="table table-dark">
                                                   <br>
-                                                  <br>
+                                                  
                                                     <tbody>
-                                                        <tr>
-                                                        {% if miner.chain_1_temp < 50 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
+                                                        <tr >
+                                                        <td><div class="result_box_1 classify-title">Chip Temps:</div></td>
+                                                        {% if miner.chain_1_temp == 0 %}
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>                                                            
+                                                        {% elif miner.chain_1_temp < 50 %}
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                                                         {% elif miner.chain_1_temp >= 50 and miner.chain_1_temp < 70 %}
-                                                        <td><div class="result_box_0 classify-good" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-good" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                                                         {% elif miner.chain_1_temp >= 70 and miner.chain_1_temp < 80 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                                                         {% elif miner.chain_1_xtemp >= 80 %}
-                                                        <td><div class="result_box_0 classify-bad" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 1">{{miner.chain_1_temp}}°C</div></td>
                                                         {% else %}
-                                                        <td><div class="result_box_0 classify-text" title="Chip 2">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-text" title="Chip 2">{{miner.chain_1_temp}}°C</div></td>
                                                         {% endif %}
                             
-                                                        {% if miner.chain_2_temp < 50 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
+                            							{% if miner.chain_2_temp == 0 %}
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
+                                                        {% elif miner.chain_2_temp < 50 %}
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
                                                         {% elif miner.chain_2_temp >= 50 and miner.chain_2_temp < 70 %}
-                                                        <td><div class="result_box_0 classify-good" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-good" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
                                                         {% elif miner.chain_2_temp >= 70 and miner.chain_2_temp < 80 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
                                                         {% elif miner.chain_2_temp >= 80 %}
-                                                        <td><div class="result_box_0 classify-bad" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 2">{{miner.chain_2_temp}}°C</div></td>
                                                         {% else %}
-                                                        <td><div class="result_box_0 classify-text" title="Chip 2">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-text" title="Chip 2">{{miner.chain_1_temp}}°C</div></td>
                                                         {% endif %}
                             
-                                                        {% if miner.chain_3_temp < 50 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
+                            							{% if miner.chain_3_temp == 0 %}
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
+                                                        {% elif miner.chain_3_temp < 50 %}
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
                                                         {% elif miner.chain_3_temp >= 50 and miner.chain_3_temp < 70 %}
-                                                        <td><div class="result_box_0 classify-good" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-good" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
                                                         {% elif miner.chain_3_temp >= 70 and miner.chain_3_temp < 80 %}
-                                                        <td><div class="result_box_0 classify-warn" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-warn" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
                                                         {% elif miner.chain_3_temp >= 80 %}
-                                                        <td><div class="result_box_0 classify-bad" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-bad" title="Chip 3">{{miner.chain_3_temp}}°C</div></td>
                                                         {% else %}
-                                                        <td><div class="result_box_0 classify-text" title="Chip 3">{{miner.chain_1_temp}}°C</div></td>
+                                                        <td><div class="result_box_1 classify-text" title="Chip 3">{{miner.chain_1_temp}}°C</div></td>
                                                         {% endif %}
-                                                        </tr>
-                                                        <tr>              
-                                                <td><div class="result_box_0 classify-text" title="Miner Type">{{ miner.type }}</div></td>
-                                            <td><div class="result_box_0 classify-good">ALL CHIPS</div> </td>
-                                            <td><div class="result_box_0 classify-text" title="IP Address">{{miner.ip}}</div> </td>
                                                         </tr>
                                                         <tr>
-                                            <td><div class="result_box_0 classify-good">CPU Usage</div></td>
-                                            {% if ':' in miner.uptime %}
-                                            <td><div class="result_box_0 classify-warn" title="Uptime (hrs)">{{miner.uptime}}</div> </td>
+                                                            <td><div class="result_box_0 classify-title">Miner Type:</div></td>
+                                                            {% if 'd3' in miner.type %}              
+                                                <td class="" colspan="3"><div class="result_box_0 classify-text" title="Miner Type">Antminer D3</div></td>
+                                                   {% elif 'l3' in miner.type %}
+                                                   <td class="" colspan="3"><div class="result_box_0 classify-text" title="Miner Type">Antminer L3</div></td>
+                                                   {% else %}
+                                                   <td class="" colspan="3"><div class="result_box_0 classify-text" title="Miner Type">Unknown</div></td>
+                                                   {% endif %}
+                                                </tr>
+                                                <tr>
+                                                    <td><div class="result_box_0 classify-title">Chip Status:</div></td>
+                                                    <td colspan="3"><div class="result_box_0 classify-good">ALL CHIPS</div> </td>
+                                                </tr>
+                                        
+                                          <tr>
+                                              <td><div class="result_box_0 classify-title">IP Address:</div></td>
+                                            <td colspan="3"><div class="result_box_0 classify-text" title="IP Address">{{miner.ip}}</div> </td>
+                                              </tr>          
+                                              <tr>
+                                                  <td><div class="result_box_0 classify-title">CPU Usage:</div></td>      
+                                            <td colspan="3"><div class="result_box_0 classify-good">CPU Usage</div></td>
+                                          </tr>
+                                          <tr>
+                                              <td><div class="result_box_0 classify-title">Uptime:</div></td>
+                                              {% if 'XX:XX' in miner.uptime %}
+                                            <td colspan="3"><div class="result_box_0 classify-bad" title="Uptime (hrs)">{{miner.uptime}}</div> </td>
+                                            {% elif ':' in miner.uptime %}
+                                            <td colspan="3"><div class="result_box_0 classify-warn" title="Uptime (hrs)">{{miner.uptime}}</div> </td>
                                             {% else %}
-                                            <td><div class="result_box_0 classify-good" title="Uptime (days)">{{miner.uptime}}</div> </td>
+                                            <td colspan="3"><div class="result_box_0 classify-good" title="Uptime (days)">{{miner.uptime}}</div> </td>
                                             {% endif %}
-                                            <td><div class="result_box_0 classify-good" title="Rate (GH/s)">{{miner.hash_rate}}</div> </td>
-                                                        </tr>
+                                            </tr>
+                                            <tr>
+                                                <td><div class="result_box_0 classify-title">Hash Rate:</div></td>
+                                            <td colspan="3"><div class="result_box_0 classify-good" title="Rate (GH/s)">{{miner.hash_rate}}</div> </td>
+                                          </tr>
                                                     </tbody>
                                               </table>
+                                              </div>
+                                              </div>
+                                              <br>
                                           </div>
-                                          <div class="col-sm-4">
-                                              <p style="text-align:left;font-weight:bold">ASIC Status:</p>
+                                          <div class="col-sm-8" style="height:100%;">
+                                          <br>
+                                          <br>
+                                          <br>
+                                          <br>
+                                          <br>
+                                          <div class="panel panel-dark row" style="margin-left: 20px;margin-right: 20px;">
+                                           <div class="panel-heading">ASIC Status</div>
+                                          <div id="asicwrap" class="panel-body table-dark">
+                                            <br>
                                               {% if 'x' in miner.asic1 or 'Couldn' in miner.asic1 %}
-                                              <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 1">
+                                              <div class="well classify-bad" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px;" title="Chip 1">
                                                 {{miner.asic1}}
                                               </div>
                                               {% else %}
-                                              <div class="well classify-good" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 1">
+                                              <div class="classify-good" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px; " title="Chip 1">
                                                 {{miner.asic1}}
                                               </div>
                                               {% endif %}
                                               {% if 'x' in miner.asic2 or 'Couldn' in miner.asic2 %}
-                                              <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 2">
+                                              <div class="well classify-bad" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px; " title="Chip 2">
                                                 {{miner.asic2}}
                                               </div>
                                               {% else %}
-                                              <div class="well classify-good" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 2">
+                                              <div class="well classify-good" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px; " title="Chip 2">
                                                 {{miner.asic2}}
                                               </div>
                                               {% endif %}
                                               {% if 'x' in miner.asic3 or 'Couldn' in miner.asic3 %}
-                                              <div class="well classify-bad" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 3">
+                                              <div class="well classify-bad" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px; " title="Chip 3">
                                                 {{miner.asic3}}
                                               </div>
                                               {% else %}
-                                              <div class="well classify-good" style="font-size:0.75em; margin-right: 60px; text-align:center " title="Chip 3">
+                                              <div class="well classify-good" style="font-size:1em; text-align:center;margin-left: 20px;margin-right: 20px; " title="Chip 3">
                                                 {{miner.asic3}}
                                               </div>
                                               {% endif %}
-                                          </div>
-                                              <div class="col-sm-4">
-                                                  <form class="form-group" action="/change_pools/" method="post" style="display:inline">
-                                                    {% csrf_token %}
-                                                        <label for="pool">Pool: </label>
-                                                        <select name="pool" id={{miner.id}}select onclick="selectChange(this,{{miner.id}},'{{miner.pool_one}}','{{miner.pool_two}}',
-                                                        '{{miner.pool_three}}','{{miner.pool_one_worker}}','{{miner.pool_two_worker}}','{{miner.pool_three_worker}}',
-                                                        '{{miner.pool_one_password}}','{{miner.pool_two_password}}','{{miner.pool_three_password}}')" >
-                                                            <option value="1"> 1 </option>
-                                                            <option value="2"> 2 </option>
-                                                            <option value="3"> 3 </option>
-                                                        </select>
-                                                        <input type="text" class="form-control" name="{{miner.id}}pool" id="{{miner.id}}pool"
-                                                            value="{{miner.pool_one}}">
-                                                        <label for="worker">Worker: </label>
-                                                        <input type="text" class="form-control" name="{{miner.id}}poolworker" id="{{miner.id}}poolworker"
-                                                        value="{{miner.pool_one_worker}}">
-                                                        <label for="password">Password: </label>
-                                                        <input type="text" class="form-control" name="{{miner.id}}poolpassword" id="{{miner.id}}poolpassword"
-                                                        value="{{miner.pool_one_password}}">
-                                                        <br>
-                                                        <input type="submit" name = "{{miner.id}}changepool" value="Change Pool"
-                                                        class="btn btn-success"></form>
-                                                        <form action="/delete_miner/" method="post" style="display:inline">
-                                                            {% csrf_token %}
-                                                                <input id = "{{miner.id}}delete" type="submit" name = "{{miner.id}}delete" value="Delete Miner"
-                                                                class="btn btn-danger">
-                                                                <a href="http://{{miner.ip}}/cgi-bin/minerConfiguration.cgi" target="_blank" 
-                                                                class="btn btn-info" id={{miner.id}}openpage>Open Configuration</a>
-                                                                </form>
-                                                        <form action="/refresh_one/" method="post" style="display:inline">
-                                                            {% csrf_token %}
-                                                                <input type="submit" name = "{{miner.id}}update" value="Refresh"
-                                                                class="btn btn-primary">
-                                                                </form>
                                               </div>
+                                          </div>
                                       </div>
+                                      </div>
+                                      </div>
+                                      <div class="panel panel-dark row" style="margin-left: 20px;margin-right: 20px;">
+                                       <div class="panel-heading">Pool Configuration</div>
+                                          <div class="panel-body table-dark">
+                                              
+                                                <form class="form-group" action="/change_pools/" method="post" style="display:inline">
+                                                  {% csrf_token %}
+                                                      <select class="btn btn-or dropdown-toggle" name="pool" id={{miner.id}}select onclick="selectChange(this,{{miner.id}},'{{miner.pool_one}}','{{miner.pool_two}}',
+                                                      '{{miner.pool_three}}','{{miner.pool_one_worker}}','{{miner.pool_two_worker}}','{{miner.pool_three_worker}}',
+                                                      '{{miner.pool_one_password}}','{{miner.pool_two_password}}','{{miner.pool_three_password}}')" >
+                                                          <option value="1"> Pool  1 </option>
+                                                          <option value="2"> Pool  2 </option>
+                                                          <option value="3"> Pool  3 </option>
+                                                      </select>
+                                                      <br>
+                                                      <br>
+                                                      <label for="pool" style="color:white;">Pool: </label>
+                                                      <input type="text" class="form-control pool_dark" name="{{miner.id}}pool" id="{{miner.id}}pool"
+                                                          value="{{miner.pool_one}}">
+                                                      <label for="worker" style="color:white;">Worker: </label>
+                                                      <input type="text" class="form-control pool_dark" name="{{miner.id}}poolworker" id="{{miner.id}}poolworker"
+                                                      value="{{miner.pool_one_worker}}">
+                                                      <label for="password" style="color:white;">Password: </label>
+                                                      <input type="text" class="form-control pool_dark" name="{{miner.id}}poolpassword" id="{{miner.id}}poolpassword"
+                                                      value="{{miner.pool_one_password}}">
+                                                      <br>
+                                                      <br>
+                                                      <div style="float:right">
+                                                      <input type="submit" name = "{{miner.id}}changepool" value="Change Pool"
+                                                      class="btn btn-or" style="margin-right:10px;"> </form>
+                                                      <form action="/delete_miner/" method="post" style="display:inline">
+                                                          {% csrf_token %}
+                                                              <input id = "{{miner.id}}delete" type="submit" name = "{{miner.id}}delete" value="Delete Miner"
+                                                              class="btn btn-or" style="margin-right:10px;">
+                                                              <a href="http://{{miner.ip}}/cgi-bin/minerConfiguration.cgi" target="_blank" 
+                                                              class="btn btn-or" style="margin-right:10px;" id={{miner.id}}openpage>Open Configuration</a>
+                                                              </form>
+                                                      <form action="/refresh_one/" method="post" style="display:inline">
+                                                          {% csrf_token %}
+                                                              <input type="submit" style="margin-right:10px;" name = "{{miner.id}}update" value="Refresh"
+                                                              class="btn btn-or">
+                                                              </form>
+                                                      </div>
+                                            </div>
                                       </div>
                           </div>
-                          <div class="modal-footer">
-                          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                          <div class="modal-footer" style="border-color:black;">
+                          <button type="button" class="btn btn-or" data-dismiss="modal">Close</button>
                           </div>
                       </div>
                   
@@ -379,7 +473,7 @@
         </div>
         <div class="col-sm-3">
           {% if slow_hash and has_miners%}
-          <div class="well" style="color: white; background-color:#AA1F1F;">
+          <div class="well" style="color: white; background-color:#841a1a;">
             <h4>Efficiency</h4>
             <p>{{eff}}%</p>
           {% else %}
@@ -394,7 +488,7 @@
     {% if not has_miners %}
     <br>
     <br>
-    <div class="well"style="border: 1px solid #004163;border-radius:7px;background-color:#AA1F1F;">
+    <div class="well"style="border: 1px solid #004163;border-radius:7px;background-color:#841a1a;">
         <h3 style="font-weight: bold;color: white; text-align:center;">No Miners have been added.</h3>
         <h4 style="color: white; text-align:center;">Miners can be added by using the tab on the navbar.</h3>
       </div>
@@ -402,6 +496,8 @@
     <div id="divLoading"></div>
     {% if has_miners %}
     <!-- Start of Miners -->
+    <p>Search miners:</p>  
+    <input class="form-control" id="myInput" type="text" placeholder="Search..">
       <br>
       <div id="miners" >
             <table id='table' class="table table-striped">
@@ -416,7 +512,7 @@
                         <th scope="col">HASH RATE</th>
                     </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="minertab">
                     {% for miner in object_list %}
                     <tr data-toggle="modal" data-target="#{{miner.id}}Modal">
                     {% if miner.has_error %}
@@ -456,6 +552,14 @@
 </body>
 
 <script>
+$(document).ready(function(){
+  $("#myInput").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#minertab tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+});
 
 $('#darkmode').click(function(e){
     $('#body').addClass('dark');

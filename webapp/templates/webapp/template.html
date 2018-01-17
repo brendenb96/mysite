@@ -20,7 +20,9 @@
     .glyphicon {
       margin-right: 10px;
     }
-    
+    .stats{
+	  background-color: #e0e0e0;
+	}
     #divLoading
     {
     display : none;
@@ -194,19 +196,19 @@
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <div class="well">
+          <div class="well stats">
             <h4>Average Hash Rate</h4>
             <p>{{avg_hash}} GH/s</p> 
           </div>
         </div>
         <div class="col-sm-3">
-          <div class="well">
+          <div class="well stats">
             <h4>Best Hash Rate</h4>
             <p>{{max_hash}} GH/s</p> 
           </div>
         </div>
         <div class="col-sm-3">
-          <div class="well">
+          <div class="well stats">
             <h4>Worst Hash Rate</h4>
             <p>{{min_hash}} GH/s</p> 
           </div>
@@ -217,7 +219,7 @@
             <h4>Efficiency</h4>
             <p>{{eff}}%</p>
           {% else %}
-          <div class="well">
+          <div class="well stats">
             <h4>Efficiency</h4>
             <p>{{eff}}%</p>
           {% endif %}  

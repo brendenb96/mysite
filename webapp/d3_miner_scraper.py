@@ -368,7 +368,7 @@ def update_one_db(ip_dest, username, password, sshpassword, type_miner):
 
     return 0
 
-def update_one_entry(ip_dest, username, password, type_miner):
+def update_one_entry(ip_dest, username, password, id):
 
     ## SUDO CODE
     # Scrape each miner for the info by looping through db of miners
@@ -397,13 +397,13 @@ def update_one_entry(ip_dest, username, password, type_miner):
 
     try:
         session = requests.Session()
-        miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password))
+        miner_status_page = session.get(status_page, auth=HTTPDigestAuth(username,password),timeout=5)
         miner_status_content = miner_status_page.json()
 
-        miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password))
+        miner_system_page = session.get(system_page, auth=HTTPDigestAuth(username,password),timeout=5)
         miner_system_content = miner_system_page.json()
 
-        miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password))
+        miner_config_page = session.get(config_page, auth=HTTPDigestAuth(username,password),timeout=5)
         miner_config_content = miner_config_page.json()
     except Exception as err:
         error_webpage = True
@@ -414,7 +414,6 @@ def update_one_entry(ip_dest, username, password, type_miner):
         pool_two = "Couldn't Update"
         pool_three = "Couldn't Update"
         hash_rate = "0.00"
-        type = type_miner
         name = "ERROR: Couldn't Update Miner"
         uptime = "XX:XX"
         chain1_temp = "0"
@@ -432,6 +431,8 @@ def update_one_entry(ip_dest, username, password, type_miner):
         pool_one_password = 'none'
         pool_two_password =  'none'
         pool_three_password = 'none'
+        
+        
 
         has_error = True
 
@@ -475,35 +476,51 @@ def update_one_entry(ip_dest, username, password, type_miner):
 
         if pool_one.rstrip() == '':
             pool_one = 'NONE'
+            pool_one_worker = 'NONE'
+            pool_one_password = 'NONE'
         if pool_two.rstrip() == '':
             pool_two = 'NONE'
+            pool_two_worker = 'NONE'
+            pool_two_password = 'NONE'
         if pool_three.rstrip() == '':
             pool_three = 'NONE'
+            pool_three_worker = 'NONE'
+            pool_three_password = 'NONE'
+
+        if chain1_temp > TEMP_HI or chain1_temp < TEMP_LO:
+            has_error = True
+
+        if chain2_temp > TEMP_HI or chain2_temp < TEMP_LO:
+            has_error = True
+
+        if chain3_temp > TEMP_HI or chain3_temp < TEMP_LO:
+            has_error = True
+
+        if float(hash_rate) < HASH_LO:
+            has_error = True
+
+        try:
+            if ':' in uptime:
+                has_error = False
+            else:
+                if int(uptime) < UP_LO:
+                    has_error = True
+        except Exception as e:
+            pass
 
     print "updating one"
-    print ip
-    print pool_one
-    print pool_two
-    print pool_three
-    print hash_rate
-    print type
-    print name
-    print chain1_temp
-    print chain2_temp
-    print chain3_temp
-    print uptime
 
     # print miner_status_content
     # print miner_system_content
     # print miner_config_content
+    # bitmain_freq,bitmain_vil,sshpassword,has_error
 
     error_msg = None
     try:
-        insert_tries = insert_tries + 1
-        cursor.execute("UPDATE webapp_miner SET pool_one=?,pool_two=?,pool_three=?,hash_rate=?,chain1_temp=?,chain2_temp=?,\
-            chain3_temp=?,uptime=?,asic1=?,asic2=?,asic3=?,pool_one_password=?,pool_one_worker=?,pool_three_password=?,pool_three_worker=?,pool_two_password=?,\
-        pool_two_worker=?",[pool_one,pool_two,pool_three,float(hash_rate),int(chain1_temp),int(chain2_temp),int(chain3_temp),
-        uptime,asic1,asic2,asic3,pool_one_password,pool_one_worker,pool_three_password,pool_three_worker,pool_two_password,pool_two_worker])       
+        cursor.execute("UPDATE webapp_miner SET pool_one=?,pool_two=?,pool_three=?,hash_rate=?,chain_1_temp=?,chain_2_temp=?,\
+            chain_3_temp=?,uptime=?,asic1=?,asic2=?,asic3=?,pool_one_password=?,pool_one_worker=?,pool_three_password=?,pool_three_worker=?,pool_two_password=?,\
+        pool_two_worker=? WHERE id=?",[pool_one,pool_two,pool_three,float(hash_rate),int(chain1_temp),int(chain2_temp),int(chain3_temp),
+        uptime,asic1,asic2,asic3,pool_one_password,pool_one_worker,pool_three_password,pool_three_worker,pool_two_password,pool_two_worker,id])       
         insert_pass = False
     except Exception as e:
         error_msg = e

@@ -18,6 +18,7 @@ added = False
 pool_change = False
 force_ref = False
 HASH_BENCHMARK = 15000
+MAX_MINERS = 30
 
 def login_user(request):
     logout(request)
@@ -244,8 +245,21 @@ def force_refresh(request):
 
 @login_required(login_url='/login/')
 def refresh_one(request):
-	update_one_entry()
-	return redirect('/')
+    if request.method == 'POST':
+        for i in range(MAX_MINERS):
+            title = str(i) + 'update'
+            if title in request.POST:
+                result = i
+                
+    if 'overview' in request.META['HTTP_REFERER']:
+        to_return = '/overview'
+    else:
+        to_return = '/'
+        
+    miner = Miner.objects.filter(id=result)[0]
+    
+    update_one_entry(miner.ip, miner.username, miner.password, miner.id)
+    return redirect(to_return)
 
 @login_required(login_url='/login/')
 def delete_miner(request):
@@ -259,10 +273,11 @@ def delete_miner(request):
 
 	result = None
 	if request.method == 'POST':
-		for i in range(30):
+		for i in range(MAX_MINERS):
 			title = str(i) + 'delete'
 			if title in request.POST:
 				result = i
+                
 
 		if result != None:
 			print "deleting " + str(result)
@@ -275,10 +290,11 @@ def change_pools(request):
 	if request.method == 'POST':
 		target_miner = None
 		target_id = None
-		for i in range(30):
+		for i in range(MAX_MINERS):
 			title = str(i) + 'changepool'
 			if title in request.POST:
 				target_id = i
+                
 
 		query_list = Miner.objects.all()
 		for miner in query_list:
