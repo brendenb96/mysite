@@ -10,8 +10,8 @@ import requests
 from requests.auth import HTTPDigestAuth
 import subprocess
 
-DB_NAME = '/home/brenden/Programs/mysite/db.sqlite3'
-#DB_NAME = '/var/www/mysite/db.sqlite3'
+#DB_NAME = '/home/brenden/Programs/mysite/db.sqlite3'
+DB_NAME = '/var/www/mysite/db.sqlite3'
 
 TEMP_HI = 75
 TEMP_LO = 30
