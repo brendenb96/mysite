@@ -10,12 +10,13 @@ import requests
 from requests.auth import HTTPDigestAuth
 import subprocess
 
-#DB_NAME = '/home/brenden/Programs/django_database/db.sqlite3'
-DB_NAME = '/var/www/mysite/db.sqlite3'
+DB_NAME = '/home/brenden/Programs/mysite/db.sqlite3'
+#DB_NAME = '/var/www/mysite/db.sqlite3'
 
 TEMP_HI = 75
 TEMP_LO = 30
 HASH_LO = 15000
+UP_LO = 1
 
 
 def update_db():
@@ -151,6 +152,16 @@ def update_db():
 
             if float(hash_rate) < HASH_LO:
                 has_error = True
+
+            try:
+                if ':' in uptime:
+                    has_error = False
+                else:
+                    if int(uptime) < UP_LO:
+                        has_error = True
+            except Exception as e:
+                pass
+
 
         print ip
         print pool_one

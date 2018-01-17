@@ -17,6 +17,13 @@
     /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
     .row.content {height: 550px}
 
+    .dark {
+      background-image: url('/static/webapp/dark.jpeg');
+    }
+    .darkside {
+      background-color: #131313;
+      color: grey;
+    }
     .glyphicon {
       margin-right: 10px;
     }
@@ -88,8 +95,8 @@
 	height: 30px;
 	border-radius: 4px;
 	text-align: center;
-    vertical-align: middle
-	font-family: "Raleway", "Lato", Helvetica, Arial, sans-serif
+  vertical-align: middle;
+	font-family: "Raleway", "Lato", Helvetica, Arial, sans-serif;
 	font-size: 14px;
 }
     .result_box_2 {
@@ -123,11 +130,11 @@
   </style>
       <div class="container-fluid">
           <div class="row content">
-            <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
+            <div id="sidebar1" class="col-sm-2 sidenav hidden-xs" style="height:100vh">
               <br>
               <img src="/static/webapp/logo.png" width="100%">
-              <p style="text-align:center;font-family: Ubuntu; ">Welcome {{user}}</p>
-              <ul class="nav nav-pills nav-stacked">
+              <p id='welcome' style="text-align:center;font-family: Ubuntu; ">Welcome, {{user}}</p>
+              <ul id="sidebar" class="nav nav-pills nav-stacked">
                 <li class="active"><a href="/"> 
                   <span class="glyphicon glyphicon-home"></span> STATUS</a></li>
                 <li><a href="/overview">
@@ -138,6 +145,8 @@
                   <span class="glyphicon glyphicon-refresh"></span> FORCE REFRESH</a></li>
                 <li><a href="/copyright">
                   <span class="glyphicon glyphicon-book"></span> MISC</a></li>
+                <li><a id='darkmode'>
+                    <span class="glyphicon glyphicon-book"></span> Dark Mode</a></li>
                 <li><a href="/logout/?next=/thanks">
                   <span class="glyphicon glyphicon-log-out"></span> LOGOUT</a></li>
               </ul><br>
@@ -280,7 +289,7 @@
                                                         class="btn btn-success"></form>
                                                         <form action="/delete_miner/" method="post" style="display:inline">
                                                             {% csrf_token %}
-                                                                <input type="submit" name = "{{miner.id}}delete" value="Delete Miner"
+                                                                <input id = "{{miner.id}}delete" type="submit" name = "{{miner.id}}delete" value="Delete Miner"
                                                                 class="btn btn-danger">
                                                                 <a href="http://{{miner.ip}}/cgi-bin/minerConfiguration.cgi" target="_blank" 
                                                                 class="btn btn-info" id={{miner.id}}openpage>Open Configuration</a>
@@ -290,7 +299,6 @@
                                                                 <input type="submit" name = "{{miner.id}}update" value="Refresh"
                                                                 class="btn btn-primary">
                                                                 </form>
-                                            
                                               </div>
                                       </div>
                                       </div>
@@ -304,7 +312,7 @@
                   </div>
                   {% endfor %}
 </head>
-<body>
+<body id="body">
 
   <!-- NOTIFICATIONS -->
   {% if 'login' in request.META.HTTP_REFERER %}
@@ -346,25 +354,25 @@
 
     <!-- Navbar -->
     <div class="col-sm-10">
-      <div class="well"style="border: 1px solid #004163;border-radius:7px;background-color:#004163 ">
+      <div id="dash" class="well"style="border: 1px solid #004163;border-radius:7px;background-color:#004163 ">
         <h3 style="font-weight: bold;color: white;">Dashboard</h3>
-        <p style="color: white">Miner Overview</p>
+        <p style="color: white">Miner Status</p>
       </div>
       <div class="row">
         <div class="col-sm-3">
-          <div class="well">
+          <div id="avg" class="well">
             <h4>Average Hash Rate</h4>
             <p>{{avg_hash}} GH/s</p> 
           </div>
         </div>
         <div class="col-sm-3">
-          <div class="well">
+          <div id="best" class="well">
             <h4>Best Hash Rate</h4>
             <p>{{max_hash}} GH/s</p> 
           </div>
         </div>
         <div class="col-sm-3">
-          <div class="well">
+          <div id="worst" class="well">
             <h4>Worst Hash Rate</h4>
             <p>{{min_hash}} GH/s</p> 
           </div>
@@ -382,13 +390,12 @@
           </div>
         </div>
       </div>
-    
 
     {% if not has_miners %}
     <br>
     <br>
     <div class="well"style="border: 1px solid #004163;border-radius:7px;background-color:#AA1F1F;">
-        <h3 style="font-weight: bold;color: white; text-align:center;">No Miners have been added!</h3>
+        <h3 style="font-weight: bold;color: white; text-align:center;">No Miners have been added.</h3>
         <h4 style="color: white; text-align:center;">Miners can be added by using the tab on the navbar.</h3>
       </div>
     {% endif %}
@@ -396,8 +403,8 @@
     {% if has_miners %}
     <!-- Start of Miners -->
       <br>
-      <div id="miners">
-            <table class="table table-striped">
+      <div id="miners" >
+            <table id='table' class="table table-striped">
                     <thead style="color:white; background-color:grey">
                     <tr>
                         <th scope="col">NAME</th>
@@ -430,7 +437,6 @@
                     <td>{{ miner.hash_rate }}</td>
                     {% endif %}
                     </tr>
-                           
                     {% endfor %}
                     </tbody>
                 </table>
@@ -450,6 +456,18 @@
 </body>
 
 <script>
+
+$('#darkmode').click(function(e){
+    $('#body').addClass('dark');
+    $('#sidebar').addClass('darkside');
+    $('#avg').addClass('darkside');
+    $('#best').addClass('darkside');
+    $('#worst').addClass('darkside');
+    $('#miners').addClass('darkside');
+    $('#table').addClass('table-dark');
+    $('#sidebar1').css('background-color','#131313');
+    
+});
 
 $('#force').click(function(e) {
   e.preventDefault(); // Prevent the href from redirecting directly

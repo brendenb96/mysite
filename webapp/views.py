@@ -191,7 +191,12 @@ def index(request):
 
 @login_required(login_url='/login/')
 def addminer(request):
-	return render(request,'webapp/addminer.html')
+	if 'overview' in request.META['HTTP_REFERER']:
+		template_to_return = 'webapp/template.html'
+	else:
+		template_to_return = 'webapp/overview.html'
+
+	return render(request,template_to_return)
 
 @login_required(login_url='/login/')
 def minerform(request):
@@ -230,7 +235,12 @@ def force_refresh(request):
 	global force_ref
 	update_db()
 	force_ref = True
-	return redirect('/')
+	if 'overview' in request.META['HTTP_REFERER']:
+		to_return = '/overview'
+	else:
+		to_return = '/'
+
+	return redirect(to_return)
 
 @login_required(login_url='/login/')
 def refresh_one(request):
@@ -242,6 +252,11 @@ def delete_miner(request):
 	global deleted
 	deleted = True
 
+	if 'overview' in request.META['HTTP_REFERER']:
+		to_return = '/overview'
+	else:
+		to_return = '/'
+
 	result = None
 	if request.method == 'POST':
 		for i in range(30):
@@ -252,7 +267,7 @@ def delete_miner(request):
 		if result != None:
 			print "deleting " + str(result)
 			delete_one_db(result)
-	return redirect('/')
+	return redirect(to_return)
 
 @login_required(login_url='/login/')
 def change_pools(request):
