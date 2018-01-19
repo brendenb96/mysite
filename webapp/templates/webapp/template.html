@@ -54,7 +54,9 @@
 
     /* Set gray background color and 100% height */
     .sidenav {
-      background-color: #f1f1f1;
+      background-color: #131313;
+      border-color: #131313;
+      color:#ff5a09;
       height: 100%;
     }
         
@@ -123,14 +125,54 @@
     .classify-text {
 	background-color: #4c6059;
 	color: white;
-} 
+}
+	::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: black;
+    opacity: 1; /* Firefox */
+}
+.active a{
+    background-color: #393939 !important;
+}
+.form-control::-moz-placeholder {
+  color: black;
+}
+.form-control:-ms-input-placeholder {
+  color: black;
+}
+.form-control::-webkit-input-placeholder {
+  color: black;
+}
+    .panel-dark{
+    background-color:#232323;
+    color:white;
+    font-weight:bold;
+    }
+    .darknav{
+    background-color:#232323;
+    border-color:#232323;
+    color:white;
+    }
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 550px}
+
+    .dark {
+      background-image: url('/static/webapp/dark.jpg');
+      height:100vh;
+    }
+    .darkside {
+      background-color: #131313;
+      color: grey;
+    }
+    .darktop{
+    background-color:black;
+    } 
 
   </style>
       <div class="container-fluid">
         <div class="row content">
           <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
             <br>
-            <img src="/static/webapp/logo.png" width="100%">
+            <img src="/static/webapp/darkgrey.png" width="100%">
             <p style="text-align:center;font-family: Ubuntu; ">Welcome, {{user}}</p>
             <ul class="nav nav-pills nav-stacked">
               <li><a href="/"> 

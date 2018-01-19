@@ -20,9 +20,10 @@
     
     /* Set gray background color and 100% height */
     .sidenav {
-      background-color: #e0e0e0;
+      background-color: #131313;
+      border-color: #131313;
+      color:#ff5a09;
       height: 100%;
-      
     }
         
     /* On small screens, set height to 'auto' for the grid */
@@ -33,27 +34,83 @@
       background-image: url('/static/webapp/background.jpg');
       height: 100%;
     }
+    	::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: black;
+    opacity: 1; /* Firefox */
+}
+.active a{
+    background-color: #393939 !important;
+}
+.form-control::-moz-placeholder {
+  color: black;
+}
+.form-control:-ms-input-placeholder {
+  color: black;
+}
+.form-control::-webkit-input-placeholder {
+  color: black;
+}
+    .panel-dark{
+    background-color:#232323;
+    color:white;
+    font-weight:bold;
+    }
+    .darknav{
+    background-color:#232323;
+    border-color:#232323;
+    color:white;
+    }
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 550px}
 
+    .dark {
+      background-image: url('/static/webapp/dark.jpg');
+      height:100vh;
+    }
+    .darkside {
+      background-color: #131313;
+      color: grey;
+    }
+    .darkwell{
+    background-color:#393939;
+    border-color:#393939;
+    color:white;
+    }
+    .darktop{
+    background-color:black;
+    }
+    .or {
+    color:#ff5a09;
+    } 
+	input, textarea, select{
+    background-color:#a3a3a3;
+    border-color:#a3a3a3;
+    color: white;
+}
+.btn-or{
+	background-color: #ff5a09;
+	color:white;
+}
   </style>
       
       <div class="container-fluid">
-          <div class="row content">
+          <div class="row content" style="background-color:black;">
             <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
               <br>
-              <img src="/static/webapp/logo.png" width="100%">
+              <img src="/static/webapp/darkgrey.png" width="100%">
+              <br>
+              <br>
               <p style="text-align:center;font-family: Ubuntu; ">Welcome {{user}}</p>
               <ul class="nav nav-pills nav-stacked">
-                <li><a href="/"> 
+                <li><a class="or" href="/"> 
                   <span class="glyphicon glyphicon-home"></span> STATUS</a></li>
-                <li><a href="/overview">
-                  <span class="glyphicon glyphicon-tasks"></span>  OVERVIEW</a></li>
-                <li class="active"><a href="/minerform">
+                <li class="active"><a class="or" href="/minerform">
                   <span class="glyphicon glyphicon-plus"></span> ADD MINER</a></li>
-                <li><a id="force" href="/force_refresh">
+                <li><a class="or" id="force" href="/force_refresh">
                   <span class="glyphicon glyphicon-refresh"></span> FORCE REFRESH</a></li>
-                <li><a href="/copyright">
+                <li><a class="or" href="/copyright">
                   <span class="glyphicon glyphicon-book"></span> MISC</a></li>
-                <li><a href="/logout/?next=/thanks">
+                <li><a class="or" href="/logout/?next=/thanks">
                   <span class="glyphicon glyphicon-log-out"></span> LOGOUT</a></li>
               </ul><br>
             </div>
@@ -65,18 +122,24 @@
             $.notify("Please fill in form correctly!", "error");
         </script>
         {% endif %}
-          <div class="col-sm-10">
-                <form method="post" class="well">{% csrf_token %}
+          <div class="col-sm-10 dark">
+                <form method="post" class="well darkwell">{% csrf_token %}
                             {% for field in form %}
                                     <div class="form-group">
-                                        <label class="control-label" style="font-family:Ubuntu">{{ field.label|upper }}</label> 
-                                        <div class="controls">{{ field }}
+                                    {% if 'SSHPASSWORD' in field.label|upper %}
+                                        <label class="control-label" title="Default: 'admin'" style="font-family:Ubuntu">{{ field.label|upper }}</label> 
+                                    {% elif 'PASSWORD' in field.label|upper %}
+                                         <label class="control-label" title="Default: 'root'" style="font-family:Ubuntu">{{ field.label|upper }}</label> 
+                                    {% else %}
+                                          <label class="control-label" style="font-family:Ubuntu">{{ field.label|upper }}</label> 
+                                    {% endif %}
+                                        <div class="controls form-dark">{{ field }}
                                     </div>
                                     </div>
                             {% endfor %}
                         <br>
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-primary" ><a href="post"></a>Submit</button>
+                            <button type="submit" class="btn btn-or" ><a href="post"></a>Submit</button>
                         </div>
                     </form>
 
