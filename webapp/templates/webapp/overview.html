@@ -13,6 +13,9 @@
   <script src="https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+  <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap.min.js"></script>
   <style>
   
     .table-dark{
@@ -46,7 +49,6 @@
 
     .dark {
       background-image: url('/static/webapp/dark.jpg');
-      height:100vh;
     }
     .darkside {
       background-color: #131313;
@@ -221,6 +223,7 @@
             <div id="sidebar1" class="col-sm-2 sidenav hidden-xs" style="height:100vh">
               <br>
               <img src="/static/webapp/darkgrey.png" width="100%">
+              <br>
               <br>
               <br>
               <p id='welcome' style="text-align:center;font-family: Ubuntu; ">Welcome, {{user}}</p>
@@ -417,7 +420,7 @@
                                                       value="{{miner.pool_one_password}}">
                                                       <br>
                                                       <br>
-                                                      <div style="float:right">
+                                                      <div class="row" style="width=100vh; float:right">
                                                       <input type="submit" name = "{{miner.id}}changepool" value="Change Pool"
                                                       class="btn btn-or" style="margin-right:10px;"> </form>
                                                       <form action="/delete_miner/" method="post" style="display:inline">
@@ -445,7 +448,7 @@
                   </div>
                   {% endfor %}
 </head>
-<body id="body">
+<body id="body" style="background-color:#232323;">
 
   <!-- NOTIFICATIONS -->
   {% if 'login' in request.META.HTTP_REFERER %}
@@ -486,7 +489,7 @@
   {% endif %}
 
     <!-- Navbar -->
-    <div class="col-sm-10 dark">
+    <div class="col-sm-10 dark" style="height:100vh;">
       <div id="dash" class="well"style="border: 1px solid #393939;border-radius:7px;background-color:#393939;">
         <h3 style="font-weight: bold;color: white;">Dashboard</h3>
         <p style="color: white">Miner Status</p>
@@ -591,6 +594,14 @@
 </body>
 
 <script>
+$(document).ready(function() {
+    $('#table').DataTable( {
+        "paging":   false,
+        "searching":   false,
+        "info":     false
+    } );
+} );
+
 $(document).ready(function(){
   $("#myInput").on("keyup", function() {
     var value = $(this).val().toLowerCase();

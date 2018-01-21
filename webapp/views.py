@@ -73,9 +73,9 @@ def overview(request):
 
 	template_dict['eff'] = "{0:.2f}".format((float(average_hash)/HASH_BENCHMARK)*100)
 	template_dict['object_list'] = query_list
-	template_dict['avg_hash'] = average_hash
-	template_dict['min_hash'] = low_hash
-	template_dict['max_hash'] = high_hash
+	template_dict['avg_hash'] = round(average_hash,2)
+	template_dict['min_hash'] = round(low_hash,2)
+	template_dict['max_hash'] = round(high_hash,2)
 	template_dict['miners'] = query_list
 	template_dict['user'] = request.user.get_short_name()
 	template_dict['has_miners'] = has_miners
@@ -141,18 +141,18 @@ def index(request):
 		sum = sum + miner.hash_rate
 		counter = counter + 1.0
 	if counter != 0.0:
-		average_hash = str(sum/counter)
+		average_hash = sum/counter
 
 	if low_hash == 10000000000000000000.0:
 		low_hash = 0.0
 
-
+        average_hash = "{0:.2f}".format(average_hash)
 	template_dict['eff'] = "{0:.2f}".format((float(average_hash)/HASH_BENCHMARK)*100)
 	template_dict['object_list'] = query_list
-	template_dict['avg_hash'] = average_hash
-	template_dict['min_hash'] = low_hash
-	template_dict['max_hash'] = high_hash
 	template_dict['miners'] = query_list
+        template_dict['avg_hash'] = average_hash
+        template_dict['min_hash'] = low_hash
+        template_dict['max_hash'] = high_hash
 	template_dict['user'] = request.user.get_short_name()
 	template_dict['has_miners'] = has_miners
 	template_dict['refresh_redirect'] = '/'
