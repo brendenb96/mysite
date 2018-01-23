@@ -10,13 +10,17 @@ from d3_miner_scraper import *
 from time import sleep
 from django.shortcuts import render_to_response,redirect
 from django.template import RequestContext
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 deleted = False
 added = False
 pool_change = False
 force_ref = False
+restart = False
+
+restart_fail = False
+
 HASH_BENCHMARK = 15000
 MAX_MINERS = 30
 
@@ -121,6 +125,8 @@ def index(request):
 	global added
 	global pool_change
 	global force_ref
+        global restart_fail
+        global restart
 
 	template_dict = {}
 	query_list = Miner.objects.all()
@@ -169,6 +175,15 @@ def index(request):
 		deleted = False
 	else:
 	 	template_dict['deleted'] = False
+         
+        if restart:
+            template_dict['restart'] = True
+            restart = False
+            if restart_fail:
+                template_dict['restart_fail'] = True
+                restart_fail = False
+        else:
+            template_dict['restart'] = False
 
 	if added:
 		template_dict['added'] = True
@@ -310,3 +325,28 @@ def change_pools(request):
 		pool_change = True
 
 	return redirect('/')
+    
+@login_required(login_url='/login/')
+def restart_miner(request):
+    global restart
+    global restart_fail
+    
+    restart = True
+
+    if 'overview' in request.META['HTTP_REFERER']:
+        to_return = '/overview'
+    else:
+        to_return = '/'
+
+    result = None
+    if request.method == 'POST':
+        for i in range(MAX_MINERS):
+            title = str(i) + 'restart'
+            if title in request.POST:
+                result = i
+
+        miner = Miner.objects.filter(id=result)[0]
+        if result != None:
+            print "restarting" + str(result)
+            restart_fail = restart_machine(miner.ip, miner.username, miner.password)
+    return redirect(to_return)

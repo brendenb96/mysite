@@ -627,3 +627,24 @@ def set_miner_conf(ip, username, password, pool_number, pool_arg, pool_user, poo
     print resp
 
     return 0
+
+def restart_machine(ip, username, password):
+    # ip = '172.16.1.76'
+    # username = 'root'
+    # password = 'admin'
+
+        # sshpass -p "admin" scp root@172.16.1.76:/config/cgminer.conf testing2
+    
+    #get_remote_string = 'sshpass -p "%s" rsync -avz root@%s:/config/cgminer.conf %s'%(password, ip, in_file)
+    run_remote_string = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no ConnectTimeout=5 %s@%s 'shutdown -r now'"%(password, username, ip)
+
+    print run_remote_string
+
+    print "****************"
+    resp = communicate(run_remote_string)
+    print resp
+    
+    if resp[1]:
+        return 1
+
+    return 0
