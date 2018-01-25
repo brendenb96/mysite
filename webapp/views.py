@@ -20,6 +20,10 @@ force_ref = False
 restart = False
 
 restart_fail = False
+pool_change_fail = False
+
+force_ref_one = False
+force_ref_one_fail = False
 
 HASH_BENCHMARK = 15000
 MAX_MINERS = 30
@@ -123,10 +127,13 @@ def index(request):
 	global HASH_BENCHMARK
 	global deleted
 	global added
+	global pool_change_fail
 	global pool_change
 	global force_ref
-        global restart_fail
-        global restart
+	global restart_fail
+	global restart
+	global force_ref_one
+	global force_ref_one_fail
 
 	template_dict = {}
 	query_list = Miner.objects.all()
@@ -176,14 +183,27 @@ def index(request):
 	else:
 	 	template_dict['deleted'] = False
          
-        if restart:
-            template_dict['restart'] = True
-            restart = False
-            if restart_fail:
-                template_dict['restart_fail'] = True
-                restart_fail = False
-        else:
-            template_dict['restart'] = False
+	if restart:
+	    template_dict['restart'] = True
+	    restart = False
+	    if restart_fail:
+	        template_dict['restart_fail'] = True
+	        restart_fail = False
+	    else:
+	    	template_dict['restart_fail'] = False
+	else:
+	    template_dict['restart'] = False
+	    
+	if force_ref_one:
+	    template_dict['force_ref_one'] = True
+	    force_ref_one = False
+	    if force_ref_one_fail:
+	        template_dict['force_ref_one_fail'] = True
+	        force_ref_one_fail = False
+	    else:
+	    	template_dict['force_ref_one_fail'] = False
+	else:
+	    template_dict['force_ref_one'] = False
 
 	if added:
 		template_dict['added'] = True
@@ -194,6 +214,11 @@ def index(request):
 	if pool_change:
 		template_dict['pool_change'] = True
 		pool_change = False
+		if pool_change_fail:
+			template_dict['pool_change_fail'] = True
+			pool_change_fail = False
+		else:
+			template_dict['pool_change_fail'] = False
 	else:
 	 	template_dict['pool_change'] = False
 
@@ -202,6 +227,18 @@ def index(request):
 		force_ref = False
 	else:
 	 	template_dict['force_ref'] = False
+	 	
+	x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+	if x_forwarded_for:
+		ip = x_forwarded_for.split(',')[0]
+	else:
+		ip = request.META.get('REMOTE_ADDR')
+		
+	template_dict['user_ip'] = ip
+	
+	################## CHANGE THIS FOR EACH SETUP ########################
+	template_dict['internal_ip'] = '192.168.0'
+	######################################################################
 
 	return render(request,'webapp/overview.html',template_dict)
 
@@ -260,21 +297,22 @@ def force_refresh(request):
 
 @login_required(login_url='/login/')
 def refresh_one(request):
-    if request.method == 'POST':
-        for i in range(MAX_MINERS):
-            title = str(i) + 'update'
-            if title in request.POST:
-                result = i
-                
-    if 'overview' in request.META['HTTP_REFERER']:
-        to_return = '/overview'
-    else:
-        to_return = '/'
-        
-    miner = Miner.objects.filter(id=result)[0]
-    
-    update_one_entry(miner.ip, miner.username, miner.password, miner.id)
-    return redirect(to_return)
+	global force_ref_one
+	global force_ref_one_fail
+	
+	force_ref_one = True
+	
+	if request.method == 'POST':
+	    for i in range(MAX_MINERS):
+	        title = str(i) + 'update'
+	        if title in request.POST:
+	            result = i
+	            
+	    
+	miner = Miner.objects.filter(id=result)[0]
+	
+	force_ref_one_fail = update_one_entry(miner.ip, miner.username, miner.password, miner.id)
+	return redirect('/')
 
 @login_required(login_url='/login/')
 def delete_miner(request):
@@ -302,6 +340,8 @@ def delete_miner(request):
 @login_required(login_url='/login/')
 def change_pools(request):
 	global pool_change
+	global pool_change_fail
+    
 	if request.method == 'POST':
 		target_miner = None
 		target_id = None
@@ -321,7 +361,7 @@ def change_pools(request):
 		pool_arg = request.POST[target_id+'pool']
 		pool_user = request.POST[target_id+'poolworker']
 		pool_pass = request.POST[target_id+'poolpassword']
-		set_miner_conf(target_miner.ip,'root',target_miner.sshpassword,pool_num,pool_arg,pool_user,pool_pass)
+		pool_change_fail = set_miner_conf(target_miner.ip,'root',target_miner.sshpassword,pool_num,pool_arg,pool_user,pool_pass)
 		pool_change = True
 
 	return redirect('/')

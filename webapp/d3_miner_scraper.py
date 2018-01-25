@@ -11,7 +11,7 @@ from requests.auth import HTTPDigestAuth
 import subprocess
 
 #DB_NAME = '/home/brenden/Programs/mysite/db.sqlite3'
-DB_NAME = '/var/www/mysite/db.sqlite3'
+DB_NAME = '/var/www/databases/db.sqlite3'
 
 TEMP_HI = 75
 TEMP_LO = 30
@@ -430,9 +430,7 @@ def update_one_entry(ip_dest, username, password, id):
 
         pool_one_password = 'none'
         pool_two_password =  'none'
-        pool_three_password = 'none'
-        
-        
+        pool_three_password = 'none' 
 
         has_error = True
 
@@ -521,16 +519,20 @@ def update_one_entry(ip_dest, username, password, id):
             chain_3_temp=?,uptime=?,asic1=?,asic2=?,asic3=?,pool_one_password=?,pool_one_worker=?,pool_three_password=?,pool_three_worker=?,pool_two_password=?,\
         pool_two_worker=? WHERE id=?",[pool_one,pool_two,pool_three,float(hash_rate),int(chain1_temp),int(chain2_temp),int(chain3_temp),
         uptime,asic1,asic2,asic3,pool_one_password,pool_one_worker,pool_three_password,pool_three_worker,pool_two_password,pool_two_worker,id])       
-        insert_pass = False
+        conn.commit()
+        conn.close()
     except Exception as e:
         error_msg = e
         print "Couldn't add miner"
         print error_msg
-
-    conn.commit()
-    conn.close()
-
-    return 0
+        conn.close()
+        return 1
+        
+    if error_webpage:
+    	return 1
+    
+    else:
+    	return 0
 
 def delete_db(database):
 
@@ -587,44 +589,53 @@ def set_miner_conf(ip, username, password, pool_number, pool_arg, pool_user, poo
         # sshpass -p "admin" scp root@172.16.1.76:/config/cgminer.conf testing2
     
     #get_remote_string = 'sshpass -p "%s" rsync -avz root@%s:/config/cgminer.conf %s'%(password, ip, in_file)
-    get_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no %s@%s:/config/cgminer.conf %s'%(password, username, ip, in_file)
-    put_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no %s %s@%s:/config/cgminer.conf'%(password, out_file, username, ip)
-    run_remote_string = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no %s@%s '/etc/init.d/cgminer.sh restart'"%(password, username, ip)
+    get_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no ConnectTimeout=10 %s@%s:/config/cgminer.conf %s'%(password, username, ip, in_file)
+    put_remote_string = 'sshpass -p "%s" scp -o StrictHostKeyChecking=no ConnectTimeout=10 %s %s@%s:/config/cgminer.conf'%(password, out_file, username, ip)
+    run_remote_string = "sshpass -p '%s' ssh -o StrictHostKeyChecking=no ConnectTimeout=10 %s@%s '/etc/init.d/cgminer.sh restart'"%(password, username, ip)
     perm_string = "chmod 7777 /tmp/temp_cgminer.conf"
 
     print get_remote_string
     print put_remote_string
     print run_remote_string
-
-    resp = communicate(get_remote_string)
-    print resp
-    #communicate(perm_string)
     
-    json_data=open(in_file).read()
-    miner_config_content = json.loads(json_data)
+    try:
 
-    if pool_number == '1':
-        miner_config_content['pools'][0]['url'] = pool_arg
-        miner_config_content['pools'][0]['user'] = pool_user
-        miner_config_content['pools'][0]['pass'] = pool_pass
-
-    if pool_number == '2':
-        miner_config_content['pools'][1]['url'] = pool_arg
-        miner_config_content['pools'][1]['user'] = pool_user
-        miner_config_content['pools'][1]['pass'] = pool_pass
-
-    if pool_number == '3':
-        miner_config_content['pools'][2]['url'] = pool_arg
-        miner_config_content['pools'][2]['user'] = pool_user
-        miner_config_content['pools'][2]['pass'] = pool_pass
-
-    with open(out_file, 'w') as outfile:
-        json.dump(miner_config_content, outfile)
-
-    communicate(put_remote_string)
-    resp = communicate(run_remote_string)
-    print "****************"
-    print resp
+        resp = communicate(get_remote_string)
+        if resp[1]:
+            return 1
+        print resp
+        #communicate(perm_string)
+        
+        json_data=open(in_file).read()
+        miner_config_content = json.loads(json_data)
+    
+        if pool_number == '1':
+            miner_config_content['pools'][0]['url'] = pool_arg
+            miner_config_content['pools'][0]['user'] = pool_user
+            miner_config_content['pools'][0]['pass'] = pool_pass
+    
+        if pool_number == '2':
+            miner_config_content['pools'][1]['url'] = pool_arg
+            miner_config_content['pools'][1]['user'] = pool_user
+            miner_config_content['pools'][1]['pass'] = pool_pass
+    
+        if pool_number == '3':
+            miner_config_content['pools'][2]['url'] = pool_arg
+            miner_config_content['pools'][2]['user'] = pool_user
+            miner_config_content['pools'][2]['pass'] = pool_pass
+    
+        with open(out_file, 'w') as outfile:
+            json.dump(miner_config_content, outfile)
+    
+        communicate(put_remote_string)
+        resp = communicate(run_remote_string)
+        if resp[1]:
+            print resp
+            return 1
+        
+    except Exception as e:
+        print str(e)
+        return 1
 
     return 0
 

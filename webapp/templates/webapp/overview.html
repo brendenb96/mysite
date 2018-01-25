@@ -151,7 +151,7 @@
       font-size: 14px;
 }
 .table-striped > tbody > tr:nth-child(odd) > td, .table-striped > tbody > tr:nth-child(odd) > th > classify-bad{
-   background-color: #dddddd;
+   background-color: white;
    color:black;
 }
 .table-striped > tbody > tr:nth-child(even) > td, .table-striped > tbody > tr:nth-child(even) > th > classify-bad {
@@ -421,15 +421,21 @@
                                                       <br>
                                                       <br>
                                                       <div class="row" style="width=100vh; float:right">
+                                                   
                                                       <input type="submit" name = "{{miner.id}}changepool" value="Change Pool"
                                                       class="btn btn-or" style="margin-right:10px;"> </form>
+                                                      
                                                       <form action="/delete_miner/" method="post" style="display:inline">
                                                           {% csrf_token %}
                                                               <input id = "{{miner.id}}delete" type="submit" name = "{{miner.id}}delete" value="Delete Miner"
-                                                              class="btn btn-or" style="margin-right:10px;">
+                                                              class="btn btn-or" style="margin-right:10px;"> </form>
+                                                              
+                                                              {% if internal_ip in user_ip %}
                                                               <a href="http://{{miner.ip}}/cgi-bin/minerConfiguration.cgi" target="_blank" 
                                                               class="btn btn-or" style="margin-right:10px;" id={{miner.id}}openpage>Open Configuration</a>
                                                               </form>
+                                                              {% endif %}
+                                                              
                                                       <form action="/refresh_one/" method="post" style="display:inline">
                                                           {% csrf_token %}
                                                               <input type="submit" style="margin-right:10px;" name = "{{miner.id}}update" value="Refresh"
@@ -463,6 +469,7 @@
   });
   </script>
   {% endif %}
+  
   {% if deleted %}
   <script>
   $( document ).ready(function() {
@@ -470,6 +477,7 @@
   });
   </script>
   {% endif %}
+  
   {% if added %}
   <script>
   $( document ).ready(function() {
@@ -477,13 +485,23 @@
   });
   </script>
   {% endif %}
+  
   {% if pool_change %}
+  {% if not pool_change_fail %}
   <script>
   $( document ).ready(function() {
     $.notify("Miner pool successfully changed", "success");
   });
   </script>
+  {% else %}
+    <script>
+  $( document ).ready(function() {
+    $.notify("Miner pool change failed", "error");
+  });
+  </script>
   {% endif %}
+  {% endif %}
+  
   {% if force_ref %}
   <script>
   $( document ).ready(function() {
@@ -491,8 +509,25 @@
   });
   </script>
   {% endif %}
+  
    {% if restart %}
    {% if not restart_fail %}
+  <script>
+  $( document ).ready(function() {
+    $.notify("Miners successfully restarted", "success");
+  });
+  </script>
+  {% else %}
+  <script>
+  $( document ).ready(function() {
+    $.notify("Miner restart error", "error");
+  });
+  </script>
+  {% endif %}
+  {% endif %}
+  
+   {% if force_ref_one %}
+   {% if not force_ref_one_fail %}
   <script>
   $( document ).ready(function() {
     $.notify("Miners successfully updated", "success");
@@ -501,7 +536,7 @@
   {% else %}
   <script>
   $( document ).ready(function() {
-    $.notify("Miner restart error", "error");
+    $.notify("Miner refresh error", "error");
   });
   </script>
   {% endif %}
@@ -576,7 +611,7 @@
                     <tbody id="minertab">
                     {% for miner in object_list %}
                     <tr data-toggle="modal" data-target="#{{miner.id}}Modal">
-                    {% if not miner.has_error %}
+                    {% if miner.has_error %}
                     <td class="classify-bad">{{ miner.name }}</td>
                     <td class="classify-bad">{{ miner.ip }}</td>
                     <td class="classify-bad">{{ miner.type }}</td>
