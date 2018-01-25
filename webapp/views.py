@@ -28,6 +28,12 @@ force_ref_one_fail = False
 HASH_BENCHMARK = 15000
 MAX_MINERS = 30
 
+def handler500(request):
+    return render(request, 'webapp/custom500.html', status=500)
+
+def handler404(request):
+    return render(request, 'webapp/custom404.html', status=404)
+   
 def login_user(request):
     logout(request)
     username = password = ''
