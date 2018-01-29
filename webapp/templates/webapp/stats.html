@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Miners - Data</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="shortcut icon" type="image/png" href="/static/webapp/favicon.png"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert/1.1.3/sweetalert.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/notify/0.4.2/notify.min.js"></script>
+<script src="https://canvasjs.com/assets/script/jquery.canvasjs.min.js"></script>
+
+<script>
+window.onload = function() {
+
+	var dataPoints = [];
+
+	var chart1 = new CanvasJS.Chart("chartContainer", {
+		animationEnabled: true,
+		zoomEnabled: true,
+		theme: "dark2",
+		backgroundColor: "#131313",
+		title: {
+			text: "Average Hash Rates"
+		},
+		axisY: {
+			title: "Hash Rate (GH/s)",
+			gridColor: "#3a3a3a",
+			titleFontSize: 24
+		},
+		data: [{
+			type: "spline",
+			color : "#ff5a09",
+			yValueFormatString: "#,### GH/s",
+			dataPoints: dataPoints
+		}]
+	});
+
+	function addData(data) {
+		for (var i = 0; i < data.length; i++) {
+			dataPoints.push({
+				x: new Date(data[i].date*1000),
+				y: data[i].units
+			});
+		}
+		chart1.render();
+
+	}
+
+	$.getJSON("/data/", addData);
+	
+	var dataPoints2 = [];
+
+	var chart2 = new CanvasJS.Chart("chartContainer2", {
+		animationEnabled: true,
+		backgroundColor: "transparent",
+		
+		title:{
+			fontColor:"white",
+			text: "Miner Percentage",
+			horizontalAlign: "left"
+		},
+		data: [{
+			type: "doughnut",
+			startAngle: 60,
+			indexLabelFontColor: "white",
+			//innerRadius: 60,
+			indexLabelFontSize: 17,
+			indexLabel: "{label} - #percent%",
+			toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+			dataPoints: dataPoints2
+		}]
+	});
+	function addMiners(data) {
+		for (var i = 0; i < data.length; i++) {
+			dataPoints2.push({
+				y: data[i].count,
+				label: data[i].labels
+			});
+		}
+		chart2.render();
+
+	}
+
+	$.getJSON("/count/", addMiners);
+	
+	
+var chart3 = new CanvasJS.Chart("chartContainer3", {
+	animationEnabled: true,
+	backgroundColor: "transparent",
+	
+	title:{
+		fontColor:"white",
+		text: "Miner Percentage",
+		horizontalAlign: "left"
+	},
+	data: [{
+		type: "doughnut",
+		startAngle: 60,
+		indexLabelFontColor: "white",
+		//innerRadius: 60,
+		indexLabelFontSize: 17,
+		indexLabel: "{label} - #percent%",
+		toolTipContent: "<b>{label}:</b> {y} (#percent%)",
+		dataPoints: [
+			{ y: 67, label: "Antminer L3" },
+			{ y: 28, label: "Antminer D3" },
+			{ y: 6, label: "Antminer S9"}
+		]
+	}]
+});
+chart3.render();
+
+}
+	
+</script>
+  <style>
+  #divLoading
+    {
+    display : none;
+    }
+    #divLoading.show
+    {
+    border-color: grey;
+    display : block;
+    position : fixed;
+    z-index: 100;
+    background-image : url('/static/webapp/load_ball.gif');
+    background-repeat : no-repeat;
+    background-position : center;
+    left : 0;
+    bottom : 0;
+    right : 0;
+    top : 0;
+    }
+    #loadinggif.show
+    {
+    left : 50%;
+    top : 50%;
+    position : absolute;
+    z-index : 101;
+    width : 32px;
+    height : 32px;
+    margin-left : -16px;
+    margin-top : -16px;
+    }
+  /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 550px}
+
+    .glyphicon {
+      margin-right: 10px;
+    }
+    
+    /* Set gray background color and 100% height */
+    .sidenav {
+      background-color: #131313;
+      border-color: #131313;
+      color:#ff5a09;
+      height: 100%;
+    }
+        
+    /* On small screens, set height to 'auto' for the grid */
+    @media screen and (max-width: 767px) {
+      .row.content {height: auto;} 
+    }
+    .back {
+      background-image: url('/static/webapp/background.jpg');
+      height: 100%;
+    }
+    	::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: black;
+    opacity: 1; /* Firefox */
+}
+.active a{
+    background-color: #393939 !important;
+}
+.form-control::-moz-placeholder {
+  color: black;
+}
+.form-control:-ms-input-placeholder {
+  color: black;
+}
+.form-control::-webkit-input-placeholder {
+  color: black;
+}
+    .panel-dark{
+    background-color:#232323;
+    color:white;
+    font-weight:bold;
+    }
+    .darknav{
+    background-color:#232323;
+    border-color:#232323;
+    color:white;
+    }
+    /* Set height of the grid so .sidenav can be 100% (adjust as needed) */
+    .row.content {height: 500px}
+
+    .dark {
+      background-image: url('/static/webapp/dark.jpg');
+      height:100vh;
+    }
+    .darkside {
+      background-color: #131313;
+      color: grey;
+    }
+    .darkwell{
+    background-color:#393939;
+    border-color:#393939;
+    color:white;
+    }
+    .darktop{
+    background-color:black;
+    }
+    .or {
+    color:#ff5a09;
+    } 
+	input, textarea, select{
+    background-color:#8c8c8c;
+    border-color:#8c8c8c;
+    color: white;
+}
+.btn-or{
+	background-color: #ff5a09;
+	color:white;
+}
+.chart{
+	margin-left:15px;
+}
+body {
+	overflow: auto;
+	padding-bottom: 200px;
+	
+}
+html {
+    height:100vh;
+	overflow: hidden;
+	background-color:black;
+}
+  </style>
+      
+      <div class="container-fluid">
+          <div class="row content" style="background-color:black;">
+            <div class="col-sm-2 sidenav hidden-xs" style="height:100vh">
+              <br>
+              <img src="/static/webapp/darkgrey.png" width="100%">
+              <br>
+              <br>
+              <br>
+              <p style="text-align:center;font-family: Ubuntu; ">Welcome {{user}}</p>
+              <ul class="nav nav-pills nav-stacked">
+                <li><a class="or" href="/"> 
+                  <span class="glyphicon glyphicon-home"></span> STATUS</a></li>
+                   <li class="active"><a class="or" href="/stats"> 
+                  <span class="glyphicon glyphicon-stats"></span> DATA</a></li>
+                <li><a class="or" href="/minerform">
+                  <span class="glyphicon glyphicon-plus"></span> ADD MINER</a></li>
+                <li><a class="or" id="force" href="/force_refresh">
+                  <span class="glyphicon glyphicon-refresh"></span> FORCE REFRESH</a></li>
+                <li><a class="or" href="/copyright">
+                  <span class="glyphicon glyphicon-book"></span> MISC</a></li>
+                <li><a class="or" href="/logout/?next=/thanks">
+                  <span class="glyphicon glyphicon-log-out"></span> LOGOUT</a></li>
+              </ul><br>
+            </div>
+          <br>
+          
+
+</head>
+<body>
+<br>
+<div id="divLoading"></div>
+<div class="col-sm-10 dark">
+
+<div class="row content">
+<div class="chart" id="chartContainer" style=" width: 98%;"></div>
+
+</div>
+
+<div class="row content">
+<div class="col-sm-6">
+<div class="chart" id="chartContainer2" style=" width: 98%;"></div>
+</div>
+<div class="col-sm-6">
+<div class="chart" id="chartContainer3" style=" width: 98%;"></div>
+</div>
+</div>
+
+</div>
+ <script>
+ $('#force').click(function(e) {
+	  e.preventDefault(); // Prevent the href from redirecting directly
+	  var linkURL = $(this).attr("href");
+	  warnBeforeRedirect(linkURL);
+	  });
+	  
+	   function warnBeforeRedirect(linkURL) {
+	      swal({
+	        title: "Are you sure?", 
+	        text: "Forcing a refresh could take up to 5 seconds per miner. Miners are automatically refreshed every 5 minutes.", 
+	        type: "warning",
+	        showCancelButton: true
+	      }, function() {
+	        // Redirect the user
+	        $("div#divLoading").addClass('show');    
+	        window.location.href = linkURL;
+	        
+	      });
+	    }
+	   
+
+</script>
+</body>
+</html>

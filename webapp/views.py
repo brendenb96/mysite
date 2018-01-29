@@ -8,10 +8,14 @@ from webapp.models import Miner
 from forms import MinerForm
 from d3_miner_scraper import *
 from time import sleep
+from random import randint
+import time
+import json
 from django.shortcuts import render_to_response,redirect
 from django.template import RequestContext
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 
 deleted = False
 added = False
@@ -62,7 +66,6 @@ def overview(request):
 
 	template_dict = {}
 	query_list = Miner.objects.all()
-	print query_list
 	sum = 0.0
 	counter = 0.0
 	average_hash = 0.0
@@ -140,6 +143,8 @@ def index(request):
 	global restart
 	global force_ref_one
 	global force_ref_one_fail
+	
+	JSON_FILENAME = "/var/www/databases/data.json"
 
 	template_dict = {}
 	query_list = Miner.objects.all()
@@ -165,13 +170,13 @@ def index(request):
 	if low_hash == 10000000000000000000.0:
 		low_hash = 0.0
 
-        average_hash = "{0:.2f}".format(average_hash)
+	average_hash = "{0:.2f}".format(average_hash)
 	template_dict['eff'] = "{0:.2f}".format((float(average_hash)/HASH_BENCHMARK)*100)
 	template_dict['object_list'] = query_list
 	template_dict['miners'] = query_list
-        template_dict['avg_hash'] = average_hash
-        template_dict['min_hash'] = low_hash
-        template_dict['max_hash'] = high_hash
+	template_dict['avg_hash'] = average_hash
+	template_dict['min_hash'] = low_hash
+	template_dict['max_hash'] = high_hash
 	template_dict['user'] = request.user.get_short_name()
 	template_dict['has_miners'] = has_miners
 	template_dict['refresh_redirect'] = '/'
@@ -245,6 +250,38 @@ def index(request):
 	################## CHANGE THIS FOR EACH SETUP ########################
 	template_dict['internal_ip'] = '192.168.0'
 	######################################################################
+
+	empty_json = False
+	
+	try:
+		with open(JSON_FILENAME, 'r') as json_data:
+			data = json.load(json_data)
+	except ValueError:
+		print "EMPTY JSON"
+		data = []
+		empty_json = True
+		
+	if not empty_json:
+		if data[-1]['date'] < (int(time.time()) - 50):
+			js = {}
+			js['date'] = int(time.time())
+			js['units'] = int(float(average_hash))
+			
+			data.append(js)
+			
+			with open(JSON_FILENAME, 'w') as json_data:
+				json.dump(data, json_data)
+				
+	else:
+		js = {}
+		js['date'] = int(time.time())
+		js['units'] = int(float(average_hash))
+		
+		data.append(js)
+		
+		with open(JSON_FILENAME, 'w') as json_data:
+			json.dump(data, json_data)
+		
 
 	return render(request,'webapp/overview.html',template_dict)
 
@@ -396,3 +433,56 @@ def restart_miner(request):
             print "restarting" + str(result)
             restart_fail = restart_machine(miner.ip, miner.username, miner.password)
     return redirect(to_return)
+   
+@login_required(login_url='/login/')
+def stats(request):
+	template_dict = {}
+	template_dict['user'] = request.user.get_short_name()
+	return render(request,'webapp/stats.html', template_dict)
+
+def data(request):
+	filename = '/var/www/databases/data.json'
+	datastore = []
+# 	if filename:
+# 		js = open(filename).read()
+# 		datastore = json.loads(js)
+	time = 1517166640
+	for i in range(100):
+		js = {}
+		hash = randint(0,14999) + randint(0,99)/100
+		time = time + (3600*24)
+		js['date'] = time
+		js['units'] = hash
+		datastore.append(js)
+		
+        
+	return JsonResponse(datastore, safe=False)
+
+def count(request):
+	filename = '/var/www/databases/counts.json'
+	datastore = []
+	if filename:
+		js = open(filename).read()
+		datastore = json.loads(js)
+	
+# 	count1 = randint(10,30)
+# 	count2 = randint(10,30)
+# 	count3 = randint(10,30)
+# 	
+# 	js = {}
+# 	js['labels'] = "Antminer L3"
+# 	js['count'] = count1
+# 	datastore.append(js)
+# 	
+# 	js = {}
+# 	js['labels'] = "Antminer D3"
+# 	js['count'] = count2
+# 	datastore.append(js)
+# 	
+# 	js = {}
+# 	js['labels'] = "Antminer S9"
+# 	js['count'] = count3
+# 	datastore.append(js)
+		
+        
+	return JsonResponse(datastore, safe=False)

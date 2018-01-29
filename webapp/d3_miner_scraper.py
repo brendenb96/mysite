@@ -5,6 +5,7 @@ import sys
 import pprint
 import sqlite3
 import json
+import time
 from optparse import OptionParser
 import requests
 from requests.auth import HTTPDigestAuth
@@ -659,3 +660,104 @@ def restart_machine(ip, username, password):
         return 1
 
     return 0
+   
+def update_avg():
+	global DB_NAME
+	
+	JSON_FILENAME = "/var/www/databases/data.json"
+	COUNT_FILENAME = "/var/www/databases/counts.json"
+	
+	conn = sqlite3.connect(DB_NAME)
+	cursor = conn.cursor()
+	
+	all_types = cursor.execute("SELECT type FROM webapp_miner").fetchall()
+	all_hashes = cursor.execute("SELECT hash_rate FROM webapp_miner").fetchall()
+	
+	average_hash = 0.0
+	sum = 0.0
+	counter = 0
+	l3_count = 0
+	d3_count = 0
+	s9_count = 0
+	has_miners = False
+	
+	for type in all_types:
+		type = type[0].encode("utf-8")
+		has_miners = True
+		if type == "antd3":
+			d3_count = d3_count + 1
+		if type == "antl3":
+			l3_count = l3_count + 1
+		if type == "ants9":
+			s9_count = s9_count + 1
+			
+	print "Counts:"
+	print d3_count
+	print l3_count
+	print s9_count
+			
+	for hash in all_hashes:
+		hash = hash[0]
+		print hash
+		has_miners = True
+		sum = sum + hash
+		counter = counter + 1.0
+		
+	if counter != 0.0:
+		average_hash = str(sum/counter)
+		
+	empty_json = False
+	
+	try:
+		with open(JSON_FILENAME, 'r') as json_data:
+			data = json.load(json_data)
+	except ValueError:
+		print "EMPTY JSON"
+		data = []
+		empty_json = True
+		
+	if not empty_json:
+		if data[-1]['date'] < (int(time.time()) - 50):
+			js = {}
+			js['date'] = int(time.time())
+			js['units'] = int(float(average_hash))
+			
+			data.append(js)
+			
+			with open(JSON_FILENAME, 'w') as json_data:
+				json.dump(data, json_data)
+				
+	else:
+		js = {}
+		js['date'] = int(time.time())
+		js['units'] = int(float(average_hash))
+		
+		data.append(js)
+		
+		with open(JSON_FILENAME, 'w') as json_data:
+			json.dump(data, json_data)
+			
+
+	datastore = []
+	
+	js = {}
+	js['labels'] = "Antminer L3"
+	js['count'] = l3_count
+	datastore.append(js)
+	
+	js = {}
+	js['labels'] = "Antminer D3"
+	js['count'] = d3_count
+	datastore.append(js)
+	
+	js = {}
+	js['labels'] = "Antminer S9"
+	js['count'] = s9_count
+	datastore.append(js)
+	
+	
+	with open(COUNT_FILENAME, 'w') as json_data:
+		json.dump(datastore, json_data)
+				
+			
+	return
